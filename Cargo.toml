@@ -1,5 +1,5 @@
 [package]
-name = "ws_chat"
+name = "RustIM"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,3 @@ edition = "2021"
 [dependencies]
 axum = "0.7.5"
 futures = "0.3.30"
-tokio = "1.38.0"
