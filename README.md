@@ -11,6 +11,7 @@ Rust based instant messaging service.
 - [ ] Implement chat backlog (user can send X messages and they will get synced to the recipient when they connect)
 - [ ] Implement group chating
 - [ ] Implement other media types (audio, vido, images, documents)
+- [ ] Implement authorization
 - [ ] Implement end to end encryption
 - [ ] Implement react UI
 - [ ] Implement user profile pictures

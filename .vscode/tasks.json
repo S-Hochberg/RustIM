@@ -1,0 +1,49 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo watch",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "watch",
+            ],
+            "problemMatcher": [
+                "$rustc-watch"
+            ],
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "clear": true,
+            },
+        },
+        {
+            "label": "cargo build",
+            "dependsOn": [
+                "cargo build debug"
+            ]
+        },
+
+        {
+            "label": "cargo build debug",
+            "type": "cargo",
+            "command": "cargo",
+            "args": [
+                "build"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+        },
+    ]
+}
