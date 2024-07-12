@@ -1,4 +1,5 @@
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, routing::get, Json};
+use tracing::info;
 
 use crate::{api::{controllers::controller::{Controller, InternalController}, response::ImResponse}};
 use crate::models::user::User;
@@ -24,7 +25,7 @@ impl Controller for UsersController{
 	}
 }
 async fn get_user(Path(user_id): Path<String>) -> impl IntoResponse{
-	// String::from("email")
-	ImResponse{status: StatusCode::ACCEPTED, body: Json(User{ id: user_id, email: String::from("email"), name: String::from("name") }) }
+	info!("Testing");
+	ImResponse{status: StatusCode::OK, body: Json(User{ id: user_id, email: String::from("email"), name: String::from("name") }) }
 
 }

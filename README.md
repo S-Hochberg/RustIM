@@ -3,8 +3,10 @@ Rust based instant messaging service.
 
 # TODO LIST:
 - [X] Implement base axum based http server
-- [ ] Implement a database using Postgres and sqlx with a users table
+- [X] Implement a database using Postgres and sqlx with a users table
+- [X] Implement actual logging
 - [ ] Implement user endpoints in the server (register, update)
+- [ ] Integrate anyhow
 - [ ] Implement http based handshake to create a web socket connection to the client
 - [ ] Implement user status (online, offline, away) and last seen
 - [ ] Implement basic messaging (text, user to user)
