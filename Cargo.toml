@@ -17,3 +17,4 @@ tower-http = { version = "0.5.2", features = ["trace"] }
 tracing = "0.1.40"
 tracing-subscriber = {version="0.3.18", features=["std", "fmt", "json"]}
 tower = "0.4.13"
+async-trait = "0.1.81"

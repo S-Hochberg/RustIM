@@ -1,20 +1,18 @@
-use crate::{ models::user::user::User, operations::operation::Operation};
+use axum::http::StatusCode;
 
-pub struct CreateUserState{
-	email: String,
-	user_name: String
-}
+use crate::{ api::response::ImResponse, models::user::user::{User, UserInput}, operations::operation::Operation};
+
 pub struct CreateUserOperation{
-	state: CreateUserState
+	state: UserInput
 }
 impl Operation<()> for CreateUserOperation{
-	type State = CreateUserState;
+	type State = UserInput;
 	
 	async fn execute(&mut self) -> crate::api::response::ImResponse<()> {
-		todo!()
-	}
-	
-	fn new(state: CreateUserState) -> Self {
+		let user = User::new(self.state.clone());
+		ImResponse{status: StatusCode::CREATED, body: ()}
+	}	
+	fn new(state: UserInput) -> Self {
 			CreateUserOperation{
 				state
 			}

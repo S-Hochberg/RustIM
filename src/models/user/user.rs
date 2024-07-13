@@ -7,12 +7,13 @@ pub struct User{
 	pub email: String,
 	pub user_name: String,
 }
-struct UserInput{
-	email: String,
-	user_name: String
+#[derive(Clone)]
+pub struct UserInput{
+	pub email: String,
+	pub user_name: String
 }
 impl User{
-	fn new(input: UserInput) -> User{
-		User {id: Uuid::now_v7(), ..input}
+	pub fn new(input: UserInput) -> User{
+		User{id: Uuid::now_v7(), email: input.email, user_name: input.user_name }
 	}
 }
