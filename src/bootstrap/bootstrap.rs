@@ -1,13 +1,11 @@
 use std::{error::Error};
 
-use sqlx::{postgres::PgConnection, Connection};
+use sqlx::{postgres::{PgConnection, PgPoolOptions}, Connection};
 use tokio::{try_join};
 use tracing::{info, span, Level};
 
-use crate::CONFIG;
-pub struct Bootstrap{
-
-}
+use crate::{io, CONFIG, IO};
+pub struct Bootstrap{}
 impl Bootstrap{
 	pub async fn deploy() -> Result<(), Box<dyn Error>>{
 		let span = tracing::span!(
@@ -19,9 +17,8 @@ impl Bootstrap{
 		Ok(())
 	}
 	async fn postgres()-> Result<(), Box<dyn Error>>{
-		let db_url = CONFIG.db.postgres.db_url;
 		let db_name = CONFIG.db.postgres.db_name;
-		let mut admin = PgConnection::connect(db_url).await?;
+		let mut admin = io::db::postgres::postgres::PostrgresConnection::admin().await;
 		match sqlx::query(format!("CREATE DATABASE {}", db_name).as_str()
 			).execute(&mut admin).await{
 			Ok(_) => {},
@@ -44,7 +41,8 @@ impl Bootstrap{
 				}?
 			},
 		};
-		let mut db_connection = PgConnection::connect(&format!("{}/{}", db_url, db_name)).await?;
+
+		admin.close().await?;
 		sqlx::query(format!(
 		"CREATE TABLE IF NOT EXISTS {}(
 			id UUID primary key,
@@ -52,8 +50,7 @@ impl Bootstrap{
 			user_name varchar(128) unique
 		)
 		", CONFIG.db.postgres.users_table).as_str())
-			.execute(&mut db_connection).await?;
-		admin.close().await?;
+			.execute(&IO.get().unwrap().sql).await?;
 		Ok(())
 	}
 }

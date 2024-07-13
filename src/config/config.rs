@@ -60,7 +60,7 @@ pub struct BootstrapConfig{
 impl Configuration for BootstrapConfig{
 	fn new() -> Self {
 		BootstrapConfig{
-    		deploy_bootstrap: env_var!("DEPLOY_BOOTSTRAP", "true") == "true"
+    		deploy_bootstrap: env_var!("DEPLOY_BOOTSTRAP", "false") == "true"
 }
 	}
 }

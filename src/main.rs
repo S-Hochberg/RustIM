@@ -1,4 +1,4 @@
-use std::{env, error::Error, net::SocketAddr};
+use std::{cell::OnceCell, env, error::Error, net::SocketAddr, sync::OnceLock};
 use bootstrap::bootstrap::Bootstrap;
 use config::config::Config;
 use lazy_static::lazy_static;
@@ -6,6 +6,9 @@ use sqlx::postgres::PgPoolOptions;
 use tokio::{signal, select};
 mod bootstrap;
 mod api;
+mod io;
+mod operations;
+mod repo;
 mod config;
 mod models;
 use config::config::Configuration;
@@ -14,8 +17,10 @@ use api::router::get_router;
 lazy_static!{
     static ref CONFIG: Config = Config::new();
 }
+static IO: OnceLock<io::io::Io> = OnceLock::new();
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>>{
+    IO.set(io::io::Io::init().await).expect("Failed initializing IO");
     let subscriber = tracing_subscriber::fmt()
         .json()
         .compact()
@@ -30,9 +35,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
         Bootstrap::deploy().await?;
     }
     let app = get_router();
-    let pool = PgPoolOptions::new()
-        .max_connections(10)
-        .connect("postgres://postgres:password@127.0.0.1:5432").await.unwrap();
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = tokio::net::TcpListener::bind(addr).await?; 
     axum::serve(listener, app.into_make_service()).with_graceful_shutdown(shutdown_signal()).await?;

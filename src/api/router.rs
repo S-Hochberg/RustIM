@@ -1,11 +1,46 @@
-use axum::{body::Body, http::{Request, StatusCode}, response::IntoResponse, routing::get, Json, Router};
+use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc, sync::Arc, time::Duration};
+
+use axum::{body::Body, http::{Method, Request, Response, StatusCode, Version}, middleware::{self, Next}, response::IntoResponse, routing::get, Extension, Json, Router};
 use serde::{Deserialize, Serialize};
-use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use uuid::Uuid;
-use tracing::{Level};
+use tokio::{task::LocalKey, task_local};
+use tower::{Layer, ServiceBuilder};
+use tower_http::{trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer}, LatencyUnit};
+use uuid::{timestamp::context, Uuid};
+use tracing::{info, span, Instrument, Level, Span};
 
 
-use super::{controllers::{controller::Controller, users_controller::UsersController}, response::ImResponse};
+use super::{controllers::{controller::Controller, users_controller::UsersController}, response::{self, ImResponse}};
+struct RequestLatency(Duration);
+
+impl fmt::Display for RequestLatency {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} ms", self.0.as_millis())
+    }
+}
+
+
+#[derive(Clone, Debug)]
+pub struct RequestContext{
+	pub request_id: Uuid,
+	pub method: Method,
+	pub uri: String,
+	pub version: Version
+}
+
+task_local! {
+    pub static REQUEST_CONTEXT: RequestContext
+}
+async fn request_info_middleware(mut req: Request<Body>, next: Next) -> Response<Body> {
+	let request_id = Uuid::new_v4();
+    let uri = req.uri().to_string();
+    let method = req.method().clone();
+	let version = req.version();
+    let request_info = RequestContext { request_id, method, uri, version };
+	REQUEST_CONTEXT.scope(request_info, async move {
+		next.run(req).await
+	}).await
+}
+
 #[derive(Serialize, Deserialize)]
 struct TestRes{
 	test: String
@@ -17,22 +52,46 @@ pub fn get_router() -> Router{
 	Router::new()
 		.route("/", x)
 		.merge(users_ctrl)
-		.layer(TraceLayer::new_for_http()
-		.on_request(DefaultOnRequest::new().level(Level::INFO))
-		.on_response(DefaultOnResponse::new().level(Level::INFO))
+	.layer(
+		TraceLayer::new_for_http()
 		.make_span_with(|request: &Request<Body>| {
-			let request_id = Uuid::new_v4();
+			let context = REQUEST_CONTEXT.get();
 			tracing::span!(
 				Level::INFO,
 				"request",
-				method = tracing::field::display(request.method()),
-				uri = tracing::field::display(request.uri()),
-				version = tracing::field::debug(request.version()),
-				request_id = tracing::field::display(request_id)
+				request_id = tracing::field::display(context.request_id)
 			)})
+			.on_request(|request: &Request<Body>, _span: &Span| {
+				let span = tracing::span!(
+					Level::INFO,
+					"request",
+					method = tracing::field::display(request.method()),
+					uri = tracing::field::display(request.uri()),
+					version = tracing::field::debug(request.version()),
+				);
+				info!(parent: &span, "started processing request");
+			}
 		)
+		.on_response(|response: &Response<_>, latency: std::time::Duration, _span: &tracing::Span| {
+			let context = REQUEST_CONTEXT.get();
+			let status = response.status().to_string();
+			let latency = RequestLatency(latency);
+			let response_span = span!(
+				Level::INFO, 
+				"response", 
+				method = tracing::field::display(context.method.clone()),
+				uri = tracing::field::display(context.uri.clone()),
+				version = tracing::field::debug(context.version),
+				latency = tracing::field::display(latency)
+			);
+			response_span.in_scope(|| {
+				info!("Sent response with status: {}", status);
+			});
+		})
+	)
+	.layer(middleware::from_fn(request_info_middleware))
 
-
+	
 }
 async fn test_res() -> impl IntoResponse{
 	ImResponse{status: StatusCode::OK, body: Json(TestRes{test: String::from("Got it")}) }

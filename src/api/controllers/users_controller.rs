@@ -1,8 +1,11 @@
+use std::time::Duration;
+
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, routing::get, Json};
+use tokio::time::sleep;
 use tracing::info;
 
-use crate::{api::{controllers::controller::{Controller, InternalController}, response::ImResponse}};
-use crate::models::user::User;
+use crate::{api::{controllers::controller::{Controller, InternalController}, response::ImResponse, router::REQUEST_CONTEXT}, models::user::user::User};
+use crate::models::user::user;
 
 
 pub struct UsersController{
@@ -25,7 +28,8 @@ impl Controller for UsersController{
 	}
 }
 async fn get_user(Path(user_id): Path<String>) -> impl IntoResponse{
-	info!("Testing");
-	ImResponse{status: StatusCode::OK, body: Json(User{ id: user_id, email: String::from("email"), name: String::from("name") }) }
+	let ctx = REQUEST_CONTEXT.get();
+	info!("{:?}", ctx);
+	ImResponse{status: StatusCode::OK, body: Json(User{ id: user_id, email: String::from("email"), user_name: String::from("name") }) }
 
 }
