@@ -1,13 +1,13 @@
-use axum::async_trait;
+use axum::{async_trait, http::StatusCode};
 use anyhow::Result;
-use crate::{models::user::user::User, operations::{operation::DefaultState, users::user_errors::UserErrors}, CONFIG, IO};
+use crate::{models::user::user::{User, UserInput}, operations::{operation::{DefaultState, OpError, OpErrorInput}, users::user_errors::USER_ERRORS}, CONFIG, IO};
 
 use super::UsersDb;
 
 pub struct PostgresUsersDB();
 #[async_trait]
 impl UsersDb for PostgresUsersDB{
-	async fn create(&self, input: User) -> Result<()>{
+	async fn create(&self, input: User) -> Result<(), OpError<UserInput>>{
 		let insert_query = &format!("INSERT INTO {} (id, user_name, email) VALUES ('{}', '{}', '{}')", CONFIG.db.postgres.users_table, input.id, input.user_name, input.email);
 		println!("{:?}", insert_query);
 		match sqlx::query(insert_query).execute(&IO.get().unwrap().sql).await{
@@ -15,9 +15,9 @@ impl UsersDb for PostgresUsersDB{
 			Err(dbError) => {
 				match dbError {
 					sqlx::Error::Database(e) if e.message().contains("duplicate key") =>{
-						Err(UserErrors::DuplicateUser((), input))
+						Err(USER_ERRORS.DuplicateUser.concat_message(e.message().to_string()))
 					},
-					_ => Err(e)
+					_ => Err(OpError::new(OpErrorInput{ message: dbError.to_string(), status: todo!(), state: todo!() }))
 				}?
 			},
 		}?;

@@ -12,14 +12,9 @@ pub struct CreateUserOpResponse{
 pub struct CreateUserOperation{
 	state: UserInput
 }
-impl Display for UserInput{
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{:?}", self)
-	}
-}
 impl Operation<CreateUserOpResponse, UserInput> for CreateUserOperation{
 	
-	async fn execute(&mut self) -> Result<ImResponse<CreateUserOpResponse>, Error> {
+	async fn execute(&mut self) -> Result<ImResponse<CreateUserOpResponse>, OpError<UserInput>> {
 		let user = User::new(self.state.clone());
 		let id = user.id.clone();
 		let repo = UsersRepo::new(DBDrivers::Postgres);

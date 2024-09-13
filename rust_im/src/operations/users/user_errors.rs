@@ -1,19 +1,12 @@
-use std::fmt::{Display, Debug};
+use std::{collections::HashMap, fmt::{Debug, Display}};
 
 use axum::http::StatusCode;
 
-use crate::operations::operation::{DefaultState, OpError};
+use crate::{models::user::user::User, operations::operation::{DefaultState, OpError}};
 
-pub enum UserErrors<State: Display + Debug>{
-	DuplicateUser(String, State)
+struct UserErrors{
+	pub DuplicateUser: OpError
 }
-
-impl<State> Into<OpError<State>> for UserErrors<State>
-where State: Display + Debug
-{
-	fn into(self) -> OpError<State> {
-		match self {
-			UserErrors::DuplicateUser(message, state) => OpError{message: format!("User already exists - {message}"), status: StatusCode::BAD_REQUEST, state},
-		}		
-	}
-}
+pub const USER_ERRORS: UserErrors = UserErrors{
+	DuplicateUser: OpError{message: "Duplicate user".to_string(), status: StatusCode::BAD_REQUEST, state: None }
+};

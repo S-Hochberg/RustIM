@@ -1061,6 +1061,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "axum",
+ "display_via_debug",
  "dotenv",
  "lazy_static",
  "serde",

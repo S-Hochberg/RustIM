@@ -2,6 +2,7 @@ use std::{ fmt::{Debug, Display}};
 
 use axum::{http::StatusCode, response::IntoResponse};
 use anyhow::{Result, Error};
+use display_via_debug::DisplayViaDebug;
 use serde::Serialize;
 use tracing::info;
 
@@ -14,18 +15,13 @@ impl Display for DefaultState{
 		write!(f, "Empty state{{}}")
 	}
 }
-#[derive(Debug)]
+#[derive(Debug, DisplayViaDebug)]
 pub struct OpError<State = DefaultState>
 where State: Display + Debug
 {
 	pub status: StatusCode,
 	pub message: String,
-	pub state: State
-}
-impl<State: Display + Debug> Display for OpError<State>{
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f,"Error - message - {}, status - {}, state - {}", self.message, self.status, self.state)
-	}
+	pub state: Option<State>
 }
 impl std::error::Error for OpError{}
 
@@ -35,17 +31,31 @@ impl<State: Display + Debug> IntoResponse for OpError<State>{
 	}
 }
 
-pub struct OpErrorInput{
+pub struct OpErrorInput<State>{
 	message: String,
-	status: Option<StatusCode>
+	status: Option<StatusCode>,
+	state: Option<State>
 }
-impl OpError{
-	// pub fn new()
+impl<State: Debug + Display> OpError<State>{
+	pub fn new(input: OpErrorInput<State>) -> Self{
+		let status = match input.status{
+			Some(status) => status,
+			None => OpError::<State>::message_to_status(&input.message),
+		};
+		OpError{
+			 status,
+			 message: input.message,
+			 state: input.state
+			}
+	}
 	pub fn message_to_status(message: &String) -> StatusCode{
 		match message.to_lowercase(){
 			message if message.contains("not found") => StatusCode::NOT_FOUND,
 			_ => StatusCode::INTERNAL_SERVER_ERROR
 		}
+	}
+	pub fn concat_message(&mut self, message: String) -> (){
+		self.message = format!("{} - {}", self.message, message)
 	}
 }
 pub trait Operation<Res: Serialize, State = DefaultState>
@@ -59,17 +69,9 @@ where State: Display + Debug
 	fn name(&mut self) -> String{
 		std::any::type_name::<Self>().to_string()
 	}
-	async fn execute(&mut self) -> Result<ImResponse<Res>>;
-	async fn on_error(&mut self, err: Error) -> OpError<State>{
-		self._default_on_error(err).await
-	}
-	async fn _default_on_error(&mut self, err: Error) -> OpError<State>{
-		let message = err.to_string();
-		OpError{
-			 status: OpError::message_to_status(&message),
-			 message,
-			 state: self.state()
-		}
+	async fn execute(&mut self) -> Result<ImResponse<Res>, OpError<State>>;
+	async fn on_error(&mut self, err: OpError<State>) -> OpError<State>{
+		err
 	}
 }
 pub struct OperationsExecutor{}
