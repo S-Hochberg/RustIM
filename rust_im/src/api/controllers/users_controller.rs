@@ -1,6 +1,4 @@
-use std::fmt::Display;
-
-use axum::{debug_handler, extract::Path, http::StatusCode, response::IntoResponse, routing::{get, post}, extract, Json};
+use axum::{extract::Path, http::StatusCode, routing::{get, post}, extract, Json};
 
 use tracing::info;
 use uuid::Uuid;

@@ -1,2 +1,2 @@
 [workspace]
-members = ["rust_im", "display_via_debug"]
+members = ["rust_im", "macros"]

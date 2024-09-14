@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-display_via_debug = { path = "../display_via_debug" }
+macros = { path = "../macros" }
 anyhow = "1.0.86"
 axum = {version = "0.7.5", features = ["macros"]}
 sqlx = { version = "0.7", features = [ "runtime-tokio", "tls-rustls", "postgres" ] }
@@ -20,3 +20,4 @@ tracing-subscriber = {version="0.3.18", features=["std", "fmt", "json"]}
 tower = "0.4.13"
 async-trait = "0.1.81"
 dotenv = "0.15.0"
+thiserror = "1.0.63"

@@ -1,14 +1,14 @@
 use std::{fmt, time::Duration};
 
-use axum::{body::Body, http::{Method, Request, Response, StatusCode, Version}, middleware::{self, Next}, response::IntoResponse, routing::get, Json, Router};
+use axum::{body::Body, http::{Method, Request, Response, Version}, middleware::{self, Next}, Router};
 use serde::{Deserialize, Serialize};
-use tokio::{task_local};
-use tower_http::{trace::{TraceLayer}};
-use uuid::{Uuid};
+use tokio::task_local;
+use tower_http::trace::TraceLayer;
+use uuid::Uuid;
 use tracing::{debug, info, span, Level, Span};
 
 
-use super::{controllers::{controller::Controller, users_controller::UsersController}, response::{ImResponse}};
+use super::controllers::{controller::Controller, users_controller::UsersController};
 struct RequestLatency(Duration);
 
 impl fmt::Display for RequestLatency {

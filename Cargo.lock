@@ -287,15 +287,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "display_via_debug"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.77",
-]
-
-[[package]]
 name = "dotenv"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -708,6 +699,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
+name = "macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.77",
+]
+
+[[package]]
 name = "matchit"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1061,11 +1061,12 @@ dependencies = [
  "anyhow",
  "async-trait",
  "axum",
- "display_via_debug",
  "dotenv",
  "lazy_static",
+ "macros",
  "serde",
  "sqlx",
+ "thiserror",
  "tokio",
  "tower",
  "tower-http",

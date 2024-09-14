@@ -1,7 +1,4 @@
-use std::{fmt::Display};
-
-use anyhow::Error;
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
 use crate::{ api::response::ImResponse, models::user::user::{User, UserInput}, operations::operation::{OpError, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
@@ -14,7 +11,7 @@ pub struct CreateUserOperation{
 }
 impl Operation<CreateUserOpResponse, UserInput> for CreateUserOperation{
 	
-	async fn execute(&mut self) -> Result<ImResponse<CreateUserOpResponse>, OpError<UserInput>> {
+	async fn execute(&mut self) -> Result<ImResponse<CreateUserOpResponse>, OpError> {
 		let user = User::new(self.state.clone());
 		let id = user.id.clone();
 		let repo = UsersRepo::new(DBDrivers::Postgres);

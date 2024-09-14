@@ -1,8 +1,6 @@
-use std::fmt::Display;
-
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use display_via_debug::DisplayViaDebug;
+use macros::DisplayViaDebug;
 
 #[derive(Deserialize, Serialize, Debug, DisplayViaDebug)]
 pub struct User{

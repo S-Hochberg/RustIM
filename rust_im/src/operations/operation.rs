@@ -1,9 +1,10 @@
 use std::{ fmt::{Debug, Display}};
 
 use axum::{http::StatusCode, response::IntoResponse};
-use anyhow::{Result, Error};
-use display_via_debug::DisplayViaDebug;
+use anyhow::Result;
+use macros::DisplayViaDebug;
 use serde::Serialize;
+use thiserror::Error;
 use tracing::info;
 
 use crate::api::response::ImResponse;
@@ -15,7 +16,7 @@ impl Display for DefaultState{
 		write!(f, "Empty state{{}}")
 	}
 }
-#[derive(Debug, DisplayViaDebug)]
+#[derive(Error, Debug, DisplayViaDebug)]
 pub struct OpError<State = DefaultState>
 where State: Display + Debug
 {
@@ -23,7 +24,6 @@ where State: Display + Debug
 	pub message: String,
 	pub state: Option<State>
 }
-impl std::error::Error for OpError{}
 
 impl<State: Display + Debug> IntoResponse for OpError<State>{
 	fn into_response(self) -> axum::response::Response {
@@ -54,8 +54,16 @@ impl<State: Debug + Display> OpError<State>{
 			_ => StatusCode::INTERNAL_SERVER_ERROR
 		}
 	}
-	pub fn concat_message(&mut self, message: String) -> (){
-		self.message = format!("{} - {}", self.message, message)
+	pub fn concat_message(&mut self, message: String) -> &Self{
+		self.message = format!("{} - {}", self.message, message);
+		self
+	}
+	pub fn internal_error() -> Self{
+		OpError{
+			message: "Internal Error".to_string(),
+			state: None,
+			status: StatusCode::INTERNAL_SERVER_ERROR
+		}
 	}
 }
 pub trait Operation<Res: Serialize, State = DefaultState>
@@ -69,9 +77,12 @@ where State: Display + Debug
 	fn name(&mut self) -> String{
 		std::any::type_name::<Self>().to_string()
 	}
-	async fn execute(&mut self) -> Result<ImResponse<Res>, OpError<State>>;
-	async fn on_error(&mut self, err: OpError<State>) -> OpError<State>{
-		err
+	async fn execute(&mut self) -> Result<ImResponse<Res>, OpError>;
+	async fn on_error(&mut self, err: OpError) -> OpError<State>{
+		self.default_on_error(err)
+	}
+	fn default_on_error(&mut self, err: OpError) -> OpError<State>{
+		OpError{message: err.message, status: err.status, state: Some(self.state())}
 	}
 }
 pub struct OperationsExecutor{}
