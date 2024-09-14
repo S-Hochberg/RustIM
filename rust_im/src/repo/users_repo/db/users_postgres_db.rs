@@ -1,9 +1,9 @@
-use std::error::Error;
+
 
 use axum::{async_trait, http::StatusCode};
 use anyhow::Result;
-use sqlx::postgres::PgQueryResult;
-use tracing::{error, warn};
+
+use tracing::{error};
 use crate::{models::user::user::User, operations::operation::OpError, CONFIG, IO};
 
 use super::UsersDb;
