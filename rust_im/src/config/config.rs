@@ -1,3 +1,5 @@
+use std::{borrow::Cow, env};
+
 use tracing::Level;
 
 
@@ -5,30 +7,28 @@ use tracing::Level;
 macro_rules! env_var {
     ( $var_name: expr, $default: expr ) => {
 		{
-			match option_env!($var_name){
-				Some(var) => {
-					var
-				},
-				None => {
-					$default
-				}
-			}
+			env_var_with_default($var_name, $default)
 		}
     };
 	( $var_name: expr) => {
 		{
-			match option_env!($var_name){
-				Some(var) => {
-					Some(var)
-				},
-				None => {
-					None
-				}
-			}
+			option_env_var($var_name)
 		}
     };
 }
 
+pub fn env_var_with_default(name: &str, default: &'static str) -> String{
+	match env::var(name) {
+		Ok(var) => var,
+		Err(_) => default.to_string(),
+	}
+}
+pub fn option_env_var(name: &str) -> Option<String>{
+	match env::var(name) {
+		Ok(var) => Some(var),
+		Err(_) => None,
+	}
+}
 pub struct Config{
 	pub db: DbConfig,
 	pub bootstrap: BootstrapConfig,
@@ -43,12 +43,16 @@ impl Configuration for Config{
 		Config{
 			db: DbConfig::new(),
 			bootstrap: BootstrapConfig::new(),
-			tracing_level: match env_var!("TRACING_LEVEL"){
-				Some("trace") => Level::TRACE,
-				Some("debug") => Level::DEBUG,
-				Some("info") => Level::INFO,
-				Some("warn") => Level::WARN,
-				Some("error") => Level::ERROR,
+			tracing_level: match option_env_var("TRACING_LEVEL"){
+				Some(val) => { match val.as_str() {
+					"trace" => Level::TRACE,
+					"debug" => Level::DEBUG,
+					"info" => Level::INFO,
+					"warn" => Level::WARN,
+					"error" => Level::ERROR,
+					_ => Level::DEBUG
+				}
+				}
 				_ => Level::DEBUG
 			}
 		}
@@ -60,7 +64,7 @@ pub struct BootstrapConfig{
 impl Configuration for BootstrapConfig{
 	fn new() -> Self {
 		BootstrapConfig{
-    		deploy_bootstrap: env_var!("DEPLOY_BOOTSTRAP", "false") == "true"
+    		deploy_bootstrap: env_var_with_default("DEPLOY_BOOTSTRAP", "false") == "true"
 }
 	}
 }
@@ -74,17 +78,21 @@ impl Configuration for DbConfig{
 		}
 	}
 }
-pub struct PostgresConfig{
-	pub db_url: &'static str,
-	pub db_name: &'static str,
-	pub users_table: &'static str
+pub struct PostgresConfig{}
+impl PostgresConfig{
+	pub fn db_url(&self) -> String{
+		env_var!("DATABASE_URL", "postgresql://postgres:password@localhost:5432")
+	}
+	pub fn db_name(&self) -> String{
+		env_var!("DB_NAME", "rust_im")
+	}
+	pub fn users_table(&self) -> String{
+		env_var!("USERS_TABLE", "users")
+	}
+
 }
 impl Configuration for PostgresConfig{
 	fn new() -> Self {
-		PostgresConfig{
-    		db_url: env_var!("DATABASE_URL", "postgresql://postgres:password@localhost:5432"),
-    		db_name: env_var!("DB_NAME", "rust_im"),
-    		users_table: env_var!("USERS_TABLE", "users"),
-}
+		PostgresConfig{ }
 	}
 }

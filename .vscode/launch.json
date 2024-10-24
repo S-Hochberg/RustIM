@@ -5,13 +5,30 @@
 			"type": "lldb",
 			"request": "launch",
 			"name": "Debug",
-			"envFile": "${workspaceFolder}/.env",
+			"envFile": "${workspaceFolder}/rust_im/.env",
 			"program": "${workspaceFolder}/target/debug/rust_im",
 			"preLaunchTask": "cargo build",
-			"cwd": "${workspaceFolder}",
+			"cwd": "${workspaceFolder}/rust_im",
 			"env": {
-				// "RUST_BACKTRACE": "1"
+				"RUST_BACKTRACE": "1"
 			}
-		}
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug selected unit test",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--",
+					"--nocapture",
+				],
+				"filter": {
+					"kind": "bin"
+				}
+			},
+			"cwd": "${workspaceFolder}/rust_im"
+		},
 	]
 }

@@ -12,6 +12,19 @@
 			"env": {
 				// "RUST_BACKTRACE": "1"
 			}
-		}
+		},
+		{
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--package=rust_im"
+                ]
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
 	]
 }

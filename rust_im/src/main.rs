@@ -1,6 +1,7 @@
-use std::{error::Error, net::SocketAddr, sync::OnceLock};
+use std::{error::Error, net::SocketAddr};
 use bootstrap::bootstrap::Bootstrap;
 use config::config::Config;
+use io::io::{Io, IO};
 use lazy_static::lazy_static;
 use dotenv::dotenv;
 
@@ -14,15 +15,15 @@ mod config;
 mod models;
 use config::config::Configuration;
 use api::router::get_router;
+mod test_setups;
 
 lazy_static!{
     static ref CONFIG: Config = Config::new();
 }
-static IO: OnceLock<io::io::Io> = OnceLock::new();
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>>{
-    dotenv();
-    IO.set(io::io::Io::init().await).expect("Failed initializing IO");
+    let _ = dotenv();
+    Io::init().await;
     let subscriber = tracing_subscriber::fmt()
         .json()
         .compact()
@@ -34,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
     tracing::subscriber::set_global_default(subscriber)?;
 
     if CONFIG.bootstrap.deploy_bootstrap{
-        Bootstrap::deploy().await?;
+        Bootstrap::deploy(bootstrap::bootstrap::BootstrapMode::Prod).await?;
     }
     let app = get_router();
     println!("{:?}", app);

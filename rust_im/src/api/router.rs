@@ -72,6 +72,8 @@ pub fn get_router() -> Router{
 		.on_response(|response: &Response<_>, latency: std::time::Duration, _span: &tracing::Span| {
 			let context = REQUEST_CONTEXT.get();
 			let status = response.status().to_string();
+			println!("{:?}", response);
+			println!("{:?}",response.body());
 			let latency = RequestLatency(latency);
 			let response_span = span!(
 				Level::INFO, 
