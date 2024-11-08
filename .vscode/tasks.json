@@ -7,10 +7,7 @@
             "command": "cargo",
             "args": [
                 "watch",
-                "-x",
-                "'run",
-                "-p",
-                "rust_im'"
+                
             ],
             "problemMatcher": [
                 "$rustc-watch"

@@ -1,12 +1,12 @@
 
-
+// #[cfg(test)]
 pub mod test_setup{
     use std::{env, time::SystemTime};
 	use tokio::sync::OnceCell;
 	use chrono::offset::Utc;
 	use sqlx::Row; 
     use crate::{bootstrap, io::{db::postgres, io::Io}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
-	pub static test_setup_done: OnceCell<()> = OnceCell::const_new();
+	pub static TEST_SETUP_DONE: OnceCell<()> = OnceCell::const_new();
 	pub struct TestContext{
 		users_repo: UsersRepo
 	}
@@ -29,7 +29,7 @@ pub mod test_setup{
 	}
 
 	pub async fn setup() -> TestContext{
-		test_setup_done.get_or_init(|| async {
+		TEST_SETUP_DONE.get_or_init(|| async {
 			teardown_test_dbs().await;
 			let boostrap_res = bootstrap::bootstrap::Bootstrap::deploy(bootstrap::bootstrap::BootstrapMode::Test).await.unwrap();
 			Io::init().await;

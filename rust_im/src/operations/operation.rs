@@ -1,4 +1,4 @@
-use std::{ fmt::{Debug, Display}};
+use std::{ fmt::{Debug, Display}, sync::Arc};
 
 use axum::{http::StatusCode, response::IntoResponse};
 use anyhow::Result;
@@ -31,6 +31,7 @@ impl<State: Display + Debug> IntoResponse for OpError<State>{
 	}
 }
 
+pub type OpResult<Res> = Result<Res, OpError>;
 pub struct OpErrorInput<State>{
 	message: String,
 	status: Option<StatusCode>,
@@ -77,7 +78,7 @@ where State: Display + Debug
 	fn name(&mut self) -> String{
 		std::any::type_name::<Self>().to_string()
 	}
-	async fn execute(&mut self) -> Result<ImResponse<Res>, OpError>;
+	async fn execute(&mut self) -> OpResult<ImResponse<Res>>;
 	async fn on_error(&mut self, err: OpError) -> OpError<State>{
 		self.default_on_error(err)
 	}

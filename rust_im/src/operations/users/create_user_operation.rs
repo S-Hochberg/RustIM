@@ -1,10 +1,10 @@
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
-use crate::{ api::response::ImResponse, models::user::user::{User, UserInput}, operations::operation::{OpError, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
+use crate::{ api::response::ImResponse, models::user::user::{PartialUser, User, UserInput}, operations::operation::{OpError, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
 #[derive(Serialize, Deserialize)]
 pub struct CreateUserOpResponse{
-	id: uuid::Uuid
+	pub id: uuid::Uuid
 }
 pub struct CreateUserOperation{
 	state: UserInput
@@ -32,12 +32,13 @@ impl Operation<CreateUserOpResponse, UserInput> for CreateUserOperation{
 
 #[cfg(test)]
 mod tests{
-    use crate::{models::user::user::UserInput, operations::{operation::{Operation, OperationsExecutor}, users::create_user_operation::CreateUserOperation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}, test_setups::test_setup};
+	use crate::test_setups::test_utils::test_utils::sample_user_input;
+    use crate::{models::user::user::UserInput, operations::{operation::{Operation, OperationsExecutor}, users::create_user_operation::CreateUserOperation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}, test_setups::{test_setup, test_utils}};
 	use axum::http::StatusCode;
 	use chrono::Utc;
 	use lazy_static::lazy_static;
 	use rand::random;
-use tracing_test::traced_test;
+	use tracing_test::traced_test;
 
 	// Keeping this as a reference of how to use lazy static with structs
 	// lazy_static!{
@@ -49,13 +50,7 @@ use tracing_test::traced_test;
 	// USER_INPUT.clone()
 	// }
 
-	fn sample_user_input() -> UserInput{
-		let random = random::<u64>().to_string();
-		UserInput{
-			email: format!("test_{}@rust_im.com", random),
-			user_name: format!("test_user_{}", random)
-		}
-	}
+
 	#[tokio::test]
 	#[traced_test]
 	async fn succesfully_create_user() -> (){

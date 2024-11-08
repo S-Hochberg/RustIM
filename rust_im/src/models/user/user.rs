@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use macros::DisplayViaDebug;
+use macros::{make_partial, DisplayViaDebug};
 
-#[derive(Deserialize, Serialize, Debug, DisplayViaDebug)]
+#[make_partial]
+#[derive(Deserialize, Serialize, Debug, DisplayViaDebug, sqlx::FromRow)]
 pub struct User{
 	pub id: Uuid,
 	pub email: String,

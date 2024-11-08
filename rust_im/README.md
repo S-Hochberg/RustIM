@@ -8,21 +8,25 @@ Rust based instant messaging service.
 - [X] Implement a display macro that just debugs the thing (maybe?)
 - [X] Implement create user endpoint with tests
 - [X] add a test framework
-- [ ] Implement get user endpoint
-- [ ] Implement update user endpoint
-- [ ] Implement delete user endpoint
-- [ ] Fix env vars to load at runtime
+- [X] Implement get user endpoint
 - [ ] Fix all warnings
 - [ ] Implement http based handshake to create a web socket connection to the client
 - [ ] Implement user status (online, offline, away) and last seen
 - [ ] Implement basic messaging (text, user to user)
+- [ ] Implement update user endpoint
+- [ ] Implement delete user endpoint
+- [ ] Fix env vars to load at runtime
+- [ ] Fix sql injection issues (test first)
+- [ ] Fix Partial struct to auto derive all attriburtes
+- [ ] Change operation structure to work with arc mutexes
 - [ ] Add better errors for json parsing issues for requests, sending which fields are missing back
 - [ ] Implement chat backlog (user can send X messages and they will get synced to the recipient when they connect)
 - [ ] Implement group chating
 - [ ] Implement other media types (audio, vido, images, documents)
-- [ ] Integrate anyhow/thiserror
 - [ ] Create a custom error enums pattern - CreateUserErrors
 - [ ] Implement authorization
 - [ ] Implement end to end encryption
 - [ ] Implement react UI
 - [ ] Implement user profile pictures
+- [ ] Implement auto validator macro on partial types
+- [ ] Implement bdd testing framework 

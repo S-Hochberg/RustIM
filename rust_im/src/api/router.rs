@@ -90,6 +90,4 @@ pub fn get_router() -> Router{
 		})
 	)
 	.layer(middleware::from_fn(request_info_middleware))
-
-	
 }

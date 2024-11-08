@@ -1,4 +1,4 @@
-use crate::{models::user::user::{User}, operations::operation::{OpError}, repo::DBDrivers};
+use crate::{models::user::user::{PartialUser, User}, operations::operation::OpError, repo::DBDrivers};
 use anyhow::Result;
 
 use super::db::{users_postgres_db::PostgresUsersDB, UsersDb};
@@ -19,5 +19,8 @@ impl UsersRepo{
 	pub async fn create(&self, user: User) -> Result<(), OpError>{
 		self.db.create(user).await?;
 		Ok(())
+	}
+	pub async fn get(&self, input: PartialUser) -> Result<User, OpError>{
+		Ok(self.db.get(input).await?)
 	}
 }
