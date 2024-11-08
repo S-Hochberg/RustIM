@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
-use crate::{ api::response::ImResponse, models::user::user::{PartialUser, User, UserInput}, operations::operation::{OpError, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
+use crate::{ api::response::ImResponse, models::user::user::{User, UserInput}, operations::operation::{OpError, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
 #[derive(Serialize, Deserialize)]
 pub struct CreateUserOpResponse{
 	pub id: uuid::Uuid
@@ -33,11 +33,11 @@ impl Operation<CreateUserOpResponse, UserInput> for CreateUserOperation{
 #[cfg(test)]
 mod tests{
 	use crate::test_setups::test_utils::test_utils::sample_user_input;
-    use crate::{models::user::user::UserInput, operations::{operation::{Operation, OperationsExecutor}, users::create_user_operation::CreateUserOperation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}, test_setups::{test_setup, test_utils}};
+    use crate::{operations::{operation::{Operation, OperationsExecutor}, users::create_user_operation::CreateUserOperation}, test_setups::{test_setup}};
 	use axum::http::StatusCode;
-	use chrono::Utc;
-	use lazy_static::lazy_static;
-	use rand::random;
+	
+	
+	
 	use tracing_test::traced_test;
 
 	// Keeping this as a reference of how to use lazy static with structs
@@ -54,7 +54,7 @@ mod tests{
 	#[tokio::test]
 	#[traced_test]
 	async fn succesfully_create_user() -> (){
-		let ctx = test_setup::test_setup::setup().await;
+		let _ctx = test_setup::test_setup::setup().await;
 		let op = CreateUserOperation::new(sample_user_input());
 		let res = OperationsExecutor::execute_op(op).await;
 		assert!(res.is_ok());

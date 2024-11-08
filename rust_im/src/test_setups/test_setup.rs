@@ -1,7 +1,7 @@
 
 // #[cfg(test)]
 pub mod test_setup{
-    use std::{env, time::SystemTime};
+    
 	use tokio::sync::OnceCell;
 	use chrono::offset::Utc;
 	use sqlx::Row; 
@@ -31,7 +31,7 @@ pub mod test_setup{
 	pub async fn setup() -> TestContext{
 		TEST_SETUP_DONE.get_or_init(|| async {
 			teardown_test_dbs().await;
-			let boostrap_res = bootstrap::bootstrap::Bootstrap::deploy(bootstrap::bootstrap::BootstrapMode::Test).await.unwrap();
+			let _boostrap_res = bootstrap::bootstrap::Bootstrap::deploy(bootstrap::bootstrap::BootstrapMode::Test).await.unwrap();
 			Io::init().await;
 		}).await;
 		let ctx = TestContext{

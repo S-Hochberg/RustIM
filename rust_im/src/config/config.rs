@@ -1,4 +1,4 @@
-use std::{borrow::Cow, env};
+use std::{env};
 
 use tracing::Level;
 

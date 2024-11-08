@@ -1,4 +1,4 @@
-use std::{ fmt::{Debug, Display}, sync::Arc};
+use std::{ fmt::{Debug, Display}};
 
 use axum::{http::StatusCode, response::IntoResponse};
 use anyhow::Result;

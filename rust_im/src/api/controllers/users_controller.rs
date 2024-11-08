@@ -1,9 +1,9 @@
-use axum::{extract::Path, http::StatusCode, routing::{get, post}, extract, Json};
+use axum::{extract::Path, routing::{get, post}, extract, Json};
 
-use tracing::info;
+
 use uuid::Uuid;
 
-use crate::{api::{controllers::controller::{Controller, InternalController}, response::ImResponse, router::REQUEST_CONTEXT}, models::user::user::{PartialUser, User, UserInput}, operations::{operation::{OpError, Operation, OperationsExecutor}, users::{create_user_operation::{CreateUserOpResponse, CreateUserOperation}, get_user_operation::GetUserOperation}}};
+use crate::{api::{controllers::controller::{Controller, InternalController}, response::ImResponse}, models::user::user::{PartialUser, User, UserInput}, operations::{operation::{OpError, Operation, OperationsExecutor}, users::{create_user_operation::{CreateUserOpResponse, CreateUserOperation}, get_user_operation::GetUserOperation}}};
 
 
 

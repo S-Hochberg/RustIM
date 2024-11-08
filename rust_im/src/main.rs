@@ -1,7 +1,7 @@
 use std::{error::Error, net::SocketAddr};
 use bootstrap::bootstrap::Bootstrap;
 use config::config::Config;
-use io::io::{Io, IO};
+use io::io::{Io};
 use lazy_static::lazy_static;
 use dotenv::dotenv;
 

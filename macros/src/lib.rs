@@ -47,7 +47,7 @@ pub fn make_partial(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let generics = input.generics.clone();
 
     // Extract attributes and filter out the `make_partial` attribute
-    let attrs = filter_make_partial_attr(&input.attrs);
+    let _attrs = filter_make_partial_attr(&input.attrs);
     // let attrs = &input.attrs;
 
     // Ensure the input is a struct

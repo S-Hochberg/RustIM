@@ -2,9 +2,9 @@ use std::{env, error::Error};
 
 use sqlx::{Connection};
 use tokio::{try_join};
-use tracing::{info, warn, Level};
+use tracing::{info, Level};
 
-use crate::{io::{self, io::IO}, test_setups::test_setup::test_setup, CONFIG};
+use crate::{io::{self}, test_setups::test_setup::test_setup, CONFIG};
 pub enum BootstrapMode{
 	Prod,
 	Test
