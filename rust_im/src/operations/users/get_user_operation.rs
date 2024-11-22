@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
-use crate::{ api::response::ImResponse, models::user::user::{PartialUser, User}, operations::operation::{OpResult, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
+use crate::{ models::user::user::{PartialUser, User}, operation::operation::{OpResult, Operation, ImResponse}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
 #[derive(Serialize, Deserialize)]
 pub struct GetUserOperation{
 	state: PartialUser
@@ -28,14 +28,9 @@ impl Operation<User, PartialUser> for GetUserOperation{
 
 #[cfg(test)]
 mod tests{
-    use crate::{models::user::user::{PartialUser}, operations::{operation::{Operation, OperationsExecutor}, users::get_user_operation::GetUserOperation}, test_setups::{test_setup, test_utils::test_utils::{create_test_user}}};
+    use crate::{operations::users::get_user_operation::GetUserOperation, models::user::user::{PartialUser}, operation::{operation::{Operation, OperationsExecutor}}, test_setups::{test_setup, test_utils::test_utils::{create_test_user}}};
 	use axum::http::StatusCode;
-	
-	
-	
 	use tracing_test::traced_test;
-
-
 	#[tokio::test]
 	#[traced_test]
 	async fn successfully_get_user() -> (){

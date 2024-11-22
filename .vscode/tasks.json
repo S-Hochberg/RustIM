@@ -7,7 +7,6 @@
             "command": "cargo",
             "args": [
                 "watch",
-                
             ],
             "problemMatcher": [
                 "$rustc-watch"

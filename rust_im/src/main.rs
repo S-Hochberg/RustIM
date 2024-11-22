@@ -7,18 +7,22 @@ use dotenv::dotenv;
 
 use tokio::{signal, select};
 mod bootstrap;
-mod api;
-mod io;
+mod api_server;
+mod ws_server; 
 mod operations;
+mod io;
+mod operation;
 mod repo;
 mod config;
 mod models;
 use config::config::Configuration;
-use api::router::get_router;
+use api_server::controllers::router::get_router;
+use ws_server::connection_manager::ConnectionManager;
 mod test_setups;
 
 lazy_static!{
     static ref CONFIG: Config = Config::new();
+    static ref connection_manager: ConnectionManager = ConnectionManager::new();
 }
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>>{

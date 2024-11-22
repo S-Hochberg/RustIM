@@ -1,4 +1,4 @@
-use crate::{models::user::user::{PartialUser, User}, operations::operation::OpError, repo::DBDrivers};
+use crate::{models::user::user::{PartialUser, User}, operation::operation::OpError, repo::DBDrivers};
 use anyhow::Result;
 
 use super::db::{users_postgres_db::PostgresUsersDB, UsersDb};

@@ -1,13 +1,11 @@
 use std::{ fmt::{Debug, Display}};
 
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::{http::StatusCode, response::{IntoResponse, Response}};
 use anyhow::Result;
 use macros::DisplayViaDebug;
 use serde::Serialize;
 use thiserror::Error;
 use tracing::info;
-
-use crate::api::response::ImResponse;
 
 #[derive(Debug)]
 pub struct DefaultState{}
@@ -32,6 +30,17 @@ impl<State: Display + Debug> IntoResponse for OpError<State>{
 }
 
 pub type OpResult<Res> = Result<Res, OpError>;
+
+
+pub struct ImResponse<R: Serialize>{
+	pub status: StatusCode,
+	pub body: R
+}
+impl<R: Serialize> IntoResponse for ImResponse<R>{
+	fn into_response(self) -> Response {
+		(self.status, axum::Json(self.body)).into_response()
+	}
+}
 pub struct OpErrorInput<State>{
 	message: String,
 	status: Option<StatusCode>,

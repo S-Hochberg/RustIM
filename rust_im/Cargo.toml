@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 macros = { path = "../macros" }
 anyhow = "1.0.86"
-axum = {version = "0.7.5", features = ["macros"]}
+axum = {version = "0.7.5", features = ["macros", "ws"]}
 sqlx = { version = "0.7", features = [ "runtime-tokio", "tls-rustls", "postgres", "uuid" ] }
 lazy_static = "1.5.0"
 serde = {version = "1.0.203", features = ["derive"]}
@@ -24,3 +24,4 @@ thiserror = "1.0.63"
 chrono = "0.4.38"
 tracing-test = "0.2.5"
 rand = "0.8.5"
+dashmap = "6.1.0"

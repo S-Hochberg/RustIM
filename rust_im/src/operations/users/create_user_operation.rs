@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
-use crate::{ api::response::ImResponse, models::user::user::{User, UserInput}, operations::operation::{OpError, Operation}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
+use crate::{ models::user::user::{User, UserInput}, operation::operation::{OpError, Operation, ImResponse}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
 #[derive(Serialize, Deserialize)]
 pub struct CreateUserOpResponse{
 	pub id: uuid::Uuid
@@ -33,7 +33,7 @@ impl Operation<CreateUserOpResponse, UserInput> for CreateUserOperation{
 #[cfg(test)]
 mod tests{
 	use crate::test_setups::test_utils::test_utils::sample_user_input;
-    use crate::{operations::{operation::{Operation, OperationsExecutor}, users::create_user_operation::CreateUserOperation}, test_setups::{test_setup}};
+    use crate::{operations::users::create_user_operation::CreateUserOperation,operation::{operation::{Operation, OperationsExecutor}}, test_setups::{test_setup}};
 	use axum::http::StatusCode;
 	
 	

@@ -3,7 +3,7 @@ pub mod test_utils{
     use rand::random;
     use uuid::Uuid;
 
-    use crate::{models::user::user::UserInput, operations::{operation::{Operation, OperationsExecutor}, users::create_user_operation::CreateUserOperation}};
+    use crate::{operations::users::create_user_operation::CreateUserOperation, models::user::user::UserInput, operation::{operation::{Operation, OperationsExecutor}}};
 
 	pub fn sample_user_input() -> UserInput{
 		let random = random::<u64>().to_string();

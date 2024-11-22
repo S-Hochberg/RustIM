@@ -3,7 +3,7 @@
 use axum::async_trait;
 use anyhow::Result;
 
-use crate::{models::user::user::{PartialUser, User}, operations::operation::OpError};
+use crate::{models::user::user::{PartialUser, User}, operation::operation::OpError};
 
 
 

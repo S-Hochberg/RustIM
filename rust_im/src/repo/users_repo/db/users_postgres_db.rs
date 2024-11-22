@@ -4,7 +4,7 @@ use axum::{async_trait, http::StatusCode};
 
 
 use tracing::{error};
-use crate::{io::io::IO, models::user::user::{PartialUser, User}, operations::operation::{OpError, OpResult}, CONFIG};
+use crate::{io::io::IO, models::user::user::{PartialUser, User}, operation::operation::{OpError, OpResult}, CONFIG};
 
 use super::UsersDb;
 
