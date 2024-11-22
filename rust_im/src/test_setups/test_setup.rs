@@ -1,5 +1,5 @@
 
-// #[cfg(test)]
+#[cfg(test)]
 pub mod test_setup{
     
 	use tokio::sync::OnceCell;

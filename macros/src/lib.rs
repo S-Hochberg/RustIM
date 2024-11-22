@@ -1,6 +1,6 @@
 extern crate proc_macro;
 
-use proc_macro::{TokenStream};
+use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Attribute, DeriveInput, Ident};
 
@@ -102,3 +102,4 @@ fn is_make_partial_attr(attr: &Attribute) -> bool {
         .map(|ident| ident == "make_partial")
         .unwrap_or(true)
 }
+

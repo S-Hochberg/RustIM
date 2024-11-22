@@ -2,7 +2,7 @@ use std::{ fmt::{Debug, Display}};
 
 use axum::{http::StatusCode, response::{IntoResponse, Response}};
 use anyhow::Result;
-use macros::DisplayViaDebug;
+use macros::{DisplayViaDebug};
 use serde::Serialize;
 use thiserror::Error;
 use tracing::info;
@@ -42,19 +42,20 @@ impl<R: Serialize> IntoResponse for ImResponse<R>{
 	}
 }
 pub struct OpErrorInput<State>{
-	message: String,
-	status: Option<StatusCode>,
-	state: Option<State>
+	pub message: Option<String>,
+	pub status: Option<StatusCode>,
+	pub state: Option<State>
 }
 impl<State: Debug + Display> OpError<State>{
 	pub fn new(input: OpErrorInput<State>) -> Self{
+		let message = input.message.unwrap_or(String::from("Internal Error"));
 		let status = match input.status{
 			Some(status) => status,
-			None => OpError::<State>::message_to_status(&input.message),
+			None => OpError::<State>::message_to_status(&message),
 		};
 		OpError{
 			 status,
-			 message: input.message,
+			 message,
 			 state: input.state
 			}
 	}
@@ -64,16 +65,23 @@ impl<State: Debug + Display> OpError<State>{
 			_ => StatusCode::INTERNAL_SERVER_ERROR
 		}
 	}
-	pub fn concat_message(&mut self, message: String) -> &Self{
-		self.message = format!("{} - {}", self.message, message);
-		self
-	}
+	// pub fn concat_message(&mut self, message: String) -> &Self{
+	// 	self.message = format!("{} - {}", self.message, message);
+	// 	self
+	// }
 	pub fn internal_error() -> Self{
 		OpError{
 			message: "Internal Error".to_string(),
 			state: None,
 			status: StatusCode::INTERNAL_SERVER_ERROR
 		}
+	}
+	pub fn bad_request(input: OpErrorInput<State>) -> OpError<State>{
+		let message = input.message.unwrap_or(String::from("Bad Request"));
+		OpError::new(OpErrorInput{
+			message: Some(message),
+			..input
+		})
 	}
 }
 pub trait Operation<Res: Serialize, State = DefaultState>

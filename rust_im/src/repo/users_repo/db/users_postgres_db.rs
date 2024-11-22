@@ -4,7 +4,7 @@ use axum::{async_trait, http::StatusCode};
 
 
 use tracing::{error};
-use crate::{io::io::IO, models::user::user::{PartialUser, User}, operation::operation::{OpError, OpResult}, CONFIG};
+use crate::{io::io::IO, models::user::user::{PartialUser, User}, operation::operation::{OpError, OpErrorInput, OpResult}, CONFIG};
 
 use super::UsersDb;
 
@@ -19,7 +19,7 @@ impl UsersDb for PostgresUsersDB{
 			Err(db_error) => {
 				match db_error {
 					sqlx::Error::Database(e) if e.message().contains("duplicate key") =>
-						Err(OpError{message: "Duplicate user".to_string(), status: StatusCode::BAD_REQUEST, state: None }),
+						Err(OpError::bad_request(OpErrorInput{message: Some("Duplicate user".to_string()), status: Some(StatusCode::BAD_REQUEST), state: None })),
 					_ => {
 						error!("{:?}", db_error);
 						Err(OpError::internal_error())

@@ -1,12 +1,18 @@
-use std::{env, error::Error};
+use std::error::Error;
 
-use sqlx::{Connection};
-use tokio::{try_join};
+use sqlx::Connection;
+use tokio::try_join;
 use tracing::{info, Level};
 
-use crate::{io::{self}, test_setups::test_setup::test_setup, CONFIG};
+use crate::{io::{self}, CONFIG};
+#[cfg(test)]
+use crate::{test_setups::test_setup::test_setup};
+#[cfg(test)]
+use std::env;
+
 pub enum BootstrapMode{
 	Prod,
+	#[cfg(test)]
 	Test
 }
 pub struct PostgresResult{
@@ -29,6 +35,7 @@ impl Bootstrap{
 	async fn postgres(mode: BootstrapMode)-> Result<PostgresResult, Box<dyn Error>>{
 		let db_name = match mode{
 			BootstrapMode::Prod => CONFIG.db.postgres.db_name().to_string(),
+			#[cfg(test)]
 			BootstrapMode::Test => {
 				let test_db_name = test_setup::get_test_db_name();
 				env::set_var("DB_NAME", &test_db_name);

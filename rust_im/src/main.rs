@@ -19,6 +19,7 @@ use config::config::Configuration;
 use api_server::controllers::router::get_router;
 use ws_server::connection_manager::ConnectionManager;
 mod test_setups;
+mod utils;
 
 lazy_static!{
     static ref CONFIG: Config = Config::new();
