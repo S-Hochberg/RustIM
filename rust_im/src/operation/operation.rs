@@ -14,6 +14,9 @@ impl Display for DefaultState{
 		write!(f, "Empty state{{}}")
 	}
 }
+pub struct ErrorResponse{
+	message: String
+}
 #[derive(Error, Debug, DisplayViaDebug)]
 pub struct OpError<State = DefaultState>
 where State: Display + Debug
@@ -25,7 +28,7 @@ where State: Display + Debug
 
 impl<State: Display + Debug> IntoResponse for OpError<State>{
 	fn into_response(self) -> axum::response::Response {
-		(self.status, axum::Json(self.message)).into_response()
+		(self.status, self.message).into_response()
 	}
 }
 

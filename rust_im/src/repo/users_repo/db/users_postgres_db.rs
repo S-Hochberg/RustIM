@@ -51,7 +51,7 @@ impl UsersDb for PostgresUsersDB{
 			Ok(val) => Ok(val),
 			Err(db_error) => {
 				match db_error {
-					sqlx::Error::Database(e) if e.message().contains("not found") =>
+					sqlx::Error::RowNotFound =>
 						Err(OpError{message: "User not found".to_string(), status: StatusCode::NOT_FOUND, state: None }),
 					_ => {
 						error!("{:?}", db_error);

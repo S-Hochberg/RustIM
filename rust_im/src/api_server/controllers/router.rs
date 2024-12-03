@@ -8,7 +8,7 @@ use uuid::Uuid;
 use tracing::{debug, info, span, Level, Span};
 
 
-use super::controllers::{controller::Controller, users_controller::UsersController};
+use super::controllers::{connections_controller::{self, ConnectionsController}, controller::Controller, users_controller::UsersController};
 struct RequestLatency(Duration);
 
 impl fmt::Display for RequestLatency {
@@ -47,8 +47,10 @@ struct TestRes{
 
 pub fn get_router() -> Router{
 	let users_ctrl = UsersController::get_ctrl().get_router();
+	let connections_controller = ConnectionsController::get_ctrl().get_router();
 	Router::new()
 		.merge(users_ctrl)
+		.merge(connections_controller)
 	.layer(
 		TraceLayer::new_for_http()
 		.make_span_with(|_request: &Request<Body>| {

@@ -6,7 +6,7 @@
 			"request": "launch",
 			"name": "Debug",
 			"envFile": "${workspaceFolder}/.env",
-			"program": "${workspaceFolder}/target/debug/rust_im",
+			"program": "${workspaceFolder}/../target/debug/rust_im",
 			"preLaunchTask": "cargo build",
 			"cwd": "${workspaceFolder}",
 			"env": {
@@ -24,7 +24,7 @@
                 ]
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}../"
         }
 	]
 }

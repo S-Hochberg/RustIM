@@ -9,12 +9,13 @@ Rust based instant messaging service.
 - [X] Implement create user endpoint with tests
 - [X] add a test framework
 - [X] Implement get user endpoint
-- [ ] Fix all warnings
 - [ ] Implement http based handshake to create a web socket connection to the client
+- [ ] Implement update user endpoint
 - [ ] Implement user status (online, offline, away) and last seen
 - [ ] Implement basic messaging (text, user to user)
-- [ ] Implement update user endpoint
+- [ ] Fix all warnings
 - [ ] Implement delete user endpoint
+- [ ] Implement prettier error json messages
 - [ ] Fix env vars to load at runtime
 - [ ] Fix sql injection issues (test first)
 - [ ] Fix Partial struct to auto derive all attriburtes
