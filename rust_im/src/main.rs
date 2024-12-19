@@ -23,7 +23,7 @@ mod utils;
 
 lazy_static!{
     static ref CONFIG: Config = Config::new();
-    static ref connection_manager: ConnectionManager = ConnectionManager::new();
+    static ref CONNECTION_MANAGER: ConnectionManager = ConnectionManager::new();
 }
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>>{

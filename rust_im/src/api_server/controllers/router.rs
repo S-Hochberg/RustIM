@@ -78,8 +78,8 @@ pub fn get_router() -> Router{
 			println!("{:?}",response.body());
 			let latency = RequestLatency(latency);
 			let response_span = span!(
-				Level::INFO, 
-				"response", 
+				Level::INFO,
+				"response",
 				method = tracing::field::display(context.method.clone()),
 				uri = tracing::field::display(context.uri.clone()),
 				version = tracing::field::debug(context.version),

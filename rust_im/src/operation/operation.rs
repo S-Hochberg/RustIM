@@ -83,7 +83,8 @@ impl<State: Debug + Display> OpError<State>{
 		let message = input.message.unwrap_or(String::from("Bad Request"));
 		OpError::new(OpErrorInput{
 			message: Some(message),
-			..input
+			status: Some(StatusCode::BAD_REQUEST),
+			state: input.state
 		})
 	}
 }
@@ -110,8 +111,8 @@ pub struct OperationsExecutor{}
 impl OperationsExecutor{
 	pub async fn execute_op<T: Serialize, State: Display + Debug>(mut op: impl Operation<T, State>) -> std::result::Result<ImResponse<T>, OpError<State>>{
 		op.init().await;
-		op.init().await;
-		op.init().await;
+		op.validate().await;
+		op.authorize().await;
 		match op.execute().await{
 			Ok(res) => Ok(res),
 			Err(err) => {

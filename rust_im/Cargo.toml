@@ -11,7 +11,7 @@ anyhow = "1.0.86"
 axum = {version = "0.7.5", features = ["macros", "ws"]}
 sqlx = { version = "0.7", features = [ "runtime-tokio", "tls-rustls", "postgres", "uuid" ] }
 lazy_static = "1.5.0"
-serde = {version = "1.0.203", features = ["derive"]}
+serde = {version = "1.0.203", features = ["derive"]} 
 tokio = {version = "1.38.0", features = ["full"]}
 uuid = {version = "1.9.1", features = ["v4", "v7", "serde"]}
 tower-http = { version = "0.5.2", features = ["trace"] }
@@ -25,3 +25,4 @@ chrono = "0.4.38"
 tracing-test = "0.2.5"
 rand = "0.8.5"
 dashmap = "6.1.0"
+futures-util = "0.3.31"

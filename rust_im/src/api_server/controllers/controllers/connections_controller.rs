@@ -1,12 +1,12 @@
-use std::{error::Error, fmt::Debug};
-
+use std::{error::Error, fmt::Debug, sync::mpsc::Receiver};
+use futures_util::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
 use axum::{
     extract::{ws::{Message, WebSocket, WebSocketUpgrade}, Path}, http::Response, response::IntoResponse, routing::{any, get, post}
 };
 use uuid::Uuid;
 
 
-use crate::{models::user::user::{PartialUser, User}, operation::operation::{OpError, OperationsExecutor}, operations::users::get_user_operation::GetUserOperation};
+use crate::{models::user::user::{PartialUser, User}, operation::operation::{OpError, OpErrorInput, OperationsExecutor}, operations::users::get_user_operation::GetUserOperation, ws_server::connection_manager::{create_user_connection, ClientConnection}, CONNECTION_MANAGER};
 use crate::operation::operation::Operation;
 
 use super::controller::{self, Controller, InternalController};
@@ -25,31 +25,21 @@ impl Controller for ConnectionsController{
 
 	fn get_router(self) -> axum::Router {
 		self.controller
-			.route("/:user_id", get(web_socket_handler))
+			.route("/:user_id", get(new_connection_handler))
 			.get_router()
 	}
-
 }
-async fn web_socket_handler(Path(user_id): Path<Uuid>, ws: WebSocketUpgrade) -> Result<impl IntoResponse, OpError<PartialUser>> {
+
+async fn new_connection_handler(Path(user_id): Path<Uuid>, ws: WebSocketUpgrade) -> Result<impl IntoResponse, OpError<PartialUser>> {
 	let op = GetUserOperation::new(PartialUser{id: Some(user_id), email: None, user_name: None});
 	let user = OperationsExecutor::execute_op(op).await?;
-    Ok(ws.on_upgrade(move |socket| create_user_connection(socket)))
-}
-
-async fn create_user_connection(mut socket: WebSocket) {
-	println!("ttt");
-	while let Some(msg) = socket.recv().await {
-		let msg = if let Ok(msg) = msg {
-			println!("{:?}", msg);
-			msg
-		} else {
-			// client disconnected
-			return;
-		};
-
-		if socket.send(msg).await.is_err() {
-			// client disconnected
-			return;
-		}
+	if CONNECTION_MANAGER.connection_exists(&user_id){
+		let err = OpError::bad_request(OpErrorInput{
+			message: Some(format!("User {} already connected, only one user connection is allowed at a time", user_id)),
+			status: None, 
+			state: None });
+		return Err(err)	
 	}
+    let res = ws.on_upgrade(move |socket| async {create_user_connection(socket, user.body).await});
+	Ok(res)
 }
