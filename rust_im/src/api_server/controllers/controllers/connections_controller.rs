@@ -1,15 +1,13 @@
-use std::{error::Error, fmt::Debug, sync::mpsc::Receiver};
-use futures_util::{sink::SinkExt, stream::{StreamExt, SplitSink, SplitStream}};
 use axum::{
-    extract::{ws::{Message, WebSocket, WebSocketUpgrade}, Path}, http::Response, response::IntoResponse, routing::{any, get, post}
+    extract::{ws::WebSocketUpgrade, Path}, response::IntoResponse, routing::get
 };
 use uuid::Uuid;
 
 
-use crate::{models::user::user::{PartialUser, User}, operation::operation::{OpError, OpErrorInput, OperationsExecutor}, operations::users::get_user_operation::GetUserOperation, ws_server::connection_manager::{create_user_connection, ClientConnection}, CONNECTION_MANAGER};
+use crate::{models::user::user::PartialUser, operation::operation::{OpError, OpErrorInput, OperationsExecutor}, operations::users::get_user_operation::GetUserOperation, ws_server::connection_manager::create_user_connection, CONNECTION_MANAGER};
 use crate::operation::operation::Operation;
 
-use super::controller::{self, Controller, InternalController};
+use super::controller::{Controller, InternalController};
 pub struct ConnectionsController{
 	controller: InternalController
 }

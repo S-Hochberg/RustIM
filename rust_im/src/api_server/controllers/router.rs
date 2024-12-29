@@ -8,7 +8,7 @@ use uuid::Uuid;
 use tracing::{debug, info, span, Level, Span};
 
 
-use super::controllers::{connections_controller::{self, ConnectionsController}, controller::Controller, users_controller::UsersController};
+use super::controllers::{connections_controller::{ConnectionsController}, controller::Controller, users_controller::UsersController};
 struct RequestLatency(Duration);
 
 impl fmt::Display for RequestLatency {

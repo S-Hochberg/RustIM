@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use axum::{async_trait, extract::ws::{CloseFrame, Message, WebSocket}};
+use axum::extract::ws::{CloseFrame, Message, WebSocket};
 use chrono::{DateTime, Utc};
 use dashmap::DashMap;
 use futures_util::{stream::{SplitSink, SplitStream}, StreamExt};
 use tracing::info;
 use uuid::Uuid;
 
-use crate::{models::user::user::User, operation::operation::{OpError, OpErrorInput}, CONNECTION_MANAGER};
+use crate::{models::user::user::User, CONNECTION_MANAGER};
 
 pub struct ConnectionManager{
 	pub connection_map: Arc<DashMap<Uuid, ClientConnection>>
