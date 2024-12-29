@@ -13,16 +13,15 @@ pub enum ChatOperation{
 	// Delete,
 	// Edit
 }
-pub struct MessageOperation{
-	pub contents: String,
-	pub message_type : MessageType,
-}
 
-pub struct ImMessageProtocol{
+pub struct MessageRequest{
 	pub operation: ChatOperation,
-	pub conversation: Uuid
+	pub recipient: Uuid,
+	pub conversation_type: ConversationType,
+	pub message_type: MessageType,
+	pub contents: String
 }
-pub struct APIImMessage{
+pub struct ImMessage{
 	pub message_type: MessageType,
 	pub content: String,
 	pub sender: Uuid,

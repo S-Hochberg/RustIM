@@ -17,6 +17,7 @@ mod config;
 mod models;
 use config::config::Configuration;
 use api_server::controllers::router::get_router;
+use tracing::info;
 use ws_server::connection_manager::ConnectionManager;
 mod test_setups;
 mod utils;
@@ -28,6 +29,10 @@ lazy_static!{
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>>{
     let _ = dotenv();
+    if CONFIG.bootstrap.deploy_bootstrap{
+        info!("Deploying bootstrap");
+        Bootstrap::deploy(bootstrap::bootstrap::BootstrapMode::Prod).await?;
+    }
     Io::init().await;
     let subscriber = tracing_subscriber::fmt()
         .json()
@@ -39,9 +44,6 @@ async fn main() -> Result<(), Box<dyn Error>>{
         .finish();
     tracing::subscriber::set_global_default(subscriber)?;
 
-    if CONFIG.bootstrap.deploy_bootstrap{
-        Bootstrap::deploy(bootstrap::bootstrap::BootstrapMode::Prod).await?;
-    }
     let app = get_router();
     println!("{:?}", app);
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
@@ -57,10 +59,17 @@ async fn shutdown_signal() {
     };
     let terminate = async{
         let sigterm = async {
-            signal::unix::signal(signal::unix::SignalKind::terminate()).expect("Failed listening for SIGTERM").recv().await
+            #[cfg(unix)]
+            signal::unix::signal(signal::unix::SignalKind::terminate()).expect("Failed listening for SIGTERM").recv().await;
+            #[cfg(windows)]
+            signal::windows::ctrl_c().expect("Failed listening for ").recv().await;
         };
         let sigint = async {
-            signal::unix::signal(signal::unix::SignalKind::interrupt()).expect("Failed listening for SIGINT").recv().await
+            #[cfg(unix)]
+            signal::unix::signal(signal::unix::SignalKind::interrupt()).expect("Failed listening for SIGINT").recv().await;
+            #[cfg(windows)]
+            signal::windows::ctrl_shutdown().expect("Failed listening for CTRL+shutdown").recv().await;
+
         };
         select!{
             _ = sigterm => {println!("Recived SIGTERM")},
