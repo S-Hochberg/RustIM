@@ -2,12 +2,12 @@ use std::{ fmt::{Debug, Display}};
 
 use axum::{http::StatusCode, response::{IntoResponse, Response}};
 use anyhow::Result;
-use macros::{DisplayViaDebug};
-use serde::Serialize;
+use macros::DisplayViaDebug;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::info;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct DefaultState{}
 impl Display for DefaultState{
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -17,12 +17,14 @@ impl Display for DefaultState{
 pub struct ErrorResponse{
 	message: String
 }
-#[derive(Error, Debug, DisplayViaDebug)]
+#[derive(Error, Debug, DisplayViaDebug, Serialize, Deserialize)]
 pub struct OpError<State = DefaultState>
 where State: Display + Debug
 {
+	#[serde(with = "http_serde_ext::status_code")]
 	pub status: StatusCode,
 	pub message: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub state: Option<State>
 }
 
