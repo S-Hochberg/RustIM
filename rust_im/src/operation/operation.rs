@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::info;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct DefaultState{}
 impl Display for DefaultState{
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -17,7 +17,7 @@ impl Display for DefaultState{
 pub struct ErrorResponse{
 	message: String
 }
-#[derive(Error, Debug, DisplayViaDebug, Serialize, Deserialize)]
+#[derive(Error, Debug, DisplayViaDebug, Serialize, Deserialize, Clone)]
 pub struct OpError<State = DefaultState>
 where State: Display + Debug
 {

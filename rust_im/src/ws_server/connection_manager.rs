@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use anyhow::Result;
-use axum::extract::ws::{CloseFrame, Message, WebSocket};
+use anyhow::{Result};
+use axum::{extract::ws::{CloseFrame, Message, WebSocket}, http::StatusCode};
 use chrono::{DateTime, Utc};
 use dashmap::{mapref::one::RefMut, DashMap};
 use futures_util::{stream::{SplitSink, SplitStream}, SinkExt, StreamExt};
-use tracing::info;
+use tracing::{info, error};
 use uuid::Uuid;
 
-use crate::{models::user::{self, user::User}, operation::operation::{OpError, OpErrorInput}, CONNECTION_MANAGER};
+use crate::{models::user::{self, user::User}, operation::operation::{OpError, OpErrorInput, Operation, OperationsExecutor}, ws_server::{messaging_service::send_message_to_user, operations::send_mesage_operation::SendMessageOperation}, CONNECTION_MANAGER};
 
 use super::im_message::MessageProtocol;
 pub struct ConnectionManager{
@@ -31,7 +31,7 @@ impl ConnectionManager{
 		self.connection_map.get_mut(user_id)
 	}
 }
-
+ 
 pub struct ClientConnection{
 	pub send_channel: SplitSink<WebSocket, Message>,
 	pub connection_time: DateTime<Utc>,
@@ -57,7 +57,29 @@ async fn read_from_socket(mut receiver: SplitStream<WebSocket>, user_id: Uuid) {
 					handle_disconnect(close_frame, user_id);
 					break;
 				},
-				Message::Text(message) => todo!(),
+				Message::Text(message) => {
+					match serde_json::from_str(message.as_str()){
+							Ok(msg) => {
+								let op = SendMessageOperation::new(msg);
+								OperationsExecutor::execute_op(op).await.unwrap();
+							},
+							Err(err) => {
+								let error_message = MessageProtocol::Error(OpError::bad_request(OpErrorInput{
+									message: Some(format!("Failed parsing request message, failed with error {}", err)),
+									status: None,
+									state: None,
+        						}));
+								if let Err(err) = send_message_to_user(&error_message, user_id).await{
+									match err.status{
+										StatusCode::INTERNAL_SERVER_ERROR => {
+											error!("Failed sending server error - {error_message} to user {user_id}")
+										},
+										_ => send_message_to_user(message, target),
+									}
+								};
+							},
+						};
+				},
 				_ => todo!()
 			};
 		} else {

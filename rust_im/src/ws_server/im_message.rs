@@ -1,16 +1,19 @@
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
+use macros::DisplayViaDebug;
 
 use crate::operation::operation::OpError;
 use crate::utils::utils::utc_date_time;
 use super::conversation::ConversationType;
 
-#[derive(Serialize, Deserialize)]
+#[serde(rename_all="lowercase")]
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
 pub enum MessageType{
 	Text
 }
-#[derive(Serialize, Deserialize)]
+#[serde(rename_all="lowercase")]
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
 pub enum ChatOperation{
 	Message,
 	// Typing,
@@ -18,23 +21,43 @@ pub enum ChatOperation{
 	// Delete,
 	// Edit
 }
-#[derive(Serialize, Deserialize)]
-#[serde(tag="protocol")]
-pub enum MessageProtocol{
-	Chat(ChatProtocol),
-	// Server(ServerProtocol),
-	Error(OpError)
-	
+#[serde(rename_all="lowercase")]
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
+pub enum MessageStatus{
+	Sent,
+	Pending,
+	Recieved,
+	Read
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct ChatProtocol{
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
+#[serde(tag="protocol", rename_all="lowercase")]
+pub enum MessageProtocol{
+	Chat(ChatMessage),
+	Success(SuccessMessage),
+	Failure,
+	Error(OpError)
+
+}
+
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct ChatMessage{
+	pub client_request_id: Uuid,
 	pub operation: ChatOperation,
-	pub recipient: Uuid,
+	pub target: Uuid,
 	pub conversation_type: ConversationType,
 	pub message_type: MessageType,
 	pub contents: String
 }
+
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct SuccessMessage{
+	pub client_request_id: Uuid,
+	pub message_status: MessageStatus
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct ImMessage{
 	pub message_type: MessageType,
