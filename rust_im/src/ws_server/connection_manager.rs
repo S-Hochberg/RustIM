@@ -1,14 +1,13 @@
-use std::{any::Any, sync::Arc};
+use std::sync::Arc;
 
-use anyhow::{Result};
-use axum::{extract::ws::{CloseFrame, Message, WebSocket}, http::StatusCode};
+use axum::extract::ws::{CloseFrame, Message, WebSocket};
 use chrono::{DateTime, Utc};
 use dashmap::{mapref::one::RefMut, DashMap};
-use futures_util::{stream::{SplitSink, SplitStream}, SinkExt, StreamExt};
-use tracing::{info, error};
+use futures_util::{stream::{SplitSink, SplitStream}, StreamExt};
+use tracing::info;
 use uuid::Uuid;
 
-use crate::{models::user::{self, user::User}, operation::operation::{OpError, OpErrorInput, Operation, OperationsExecutor}, ws_server::{im_message::SuccessMessage, messaging_service::{send_error_to_user, send_message_to_user}, operations::send_mesage_operation::SendMessageOperation}, CONNECTION_MANAGER};
+use crate::{models::user::{user::User}, operation::operation::{OpError, OpErrorInput, Operation, OperationsExecutor}, ws_server::{im_message::SuccessMessage, messaging_service::{send_error_to_user, send_message_to_user}, operations::send_mesage_operation::SendMessageOperation}, CONNECTION_MANAGER};
 
 use super::im_message::MessageProtocol;
 pub struct ConnectionManager{

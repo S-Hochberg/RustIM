@@ -1,4 +1,4 @@
-use axum::{extract::ws::Message, http::StatusCode};
+use axum::extract::ws::Message;
 use futures_util::SinkExt;
 use serde_json::to_string;
 use tracing::{warn, error};
