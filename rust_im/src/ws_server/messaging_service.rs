@@ -1,7 +1,7 @@
-use axum::extract::ws::Message;
+use axum::{extract::ws::Message, http::StatusCode};
 use futures_util::SinkExt;
 use serde_json::to_string;
-use tracing::warn;
+use tracing::{warn, error};
 use uuid::Uuid;
 use anyhow::Result;
 use crate::{operation::operation::{OpError, OpErrorInput}, CONNECTION_MANAGER};
@@ -33,4 +33,21 @@ pub async fn send_message_to_user(message: &MessageProtocol, target: Uuid) -> Re
                      state: None }))
             ,
         }
+}
+
+pub async fn send_error_to_user(error: OpError, user_id: Uuid) -> () {
+    let error_message = MessageProtocol::Error(error);
+    //TODO: handle failure of sending error message to client more cleanly (when would this even happen?)
+    if let Err(err) = send_message_to_user(&error_message, user_id).await{
+        match err.status{ 
+            // StatusCode::INTERNAL_SERVER_ERROR => {
+            //     error!("Failed sending server error - {error_message} to user {user_id}")
+            // },
+            //TODO: handle failure of sending message to client
+            _ => {
+                error!("Failed sending server error - {error_message} to user {user_id} with error {err}")
+            }
+        }
+    };
+    ()
 }

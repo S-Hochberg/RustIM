@@ -34,8 +34,17 @@ impl<State: Display + Debug> IntoResponse for OpError<State>{
 	}
 }
 
-pub type OpResult<Res> = Result<Res, OpError>;
+impl<State: Display + Debug> OpError<State>{
+	pub fn into_default_state(&self) -> OpError{
+		OpError{
+    		status: self.status,
+    		message: self.message.clone(),
+    		state: None,
+}
+	}
+}
 
+pub type OpResult<Res> = Result<Res, OpError>;
 
 pub struct ImResponse<R: Serialize>{
 	pub status: StatusCode,

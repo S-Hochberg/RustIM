@@ -1,7 +1,9 @@
 use axum::http::StatusCode;
+use macros::DisplayViaDebug;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::{operation::operation::{ImResponse, OpResult, Operation}, ws_server::{im_message::{ChatMessage, MessageProtocol}, messaging_service::send_message_to_user}};
+use crate::{operation::operation::{ImResponse, OpResult, Operation}, ws_server::{im_message::{ChatMessage, MessageProtocol, MessageStatus, SuccessMessage}, messaging_service::send_message_to_user}};
 
 // #[derive(Serialize, Deserialize)]
 // pub struct SendMessageState{
@@ -10,11 +12,18 @@ use crate::{operation::operation::{ImResponse, OpResult, Operation}, ws_server::
 
 #[derive(Serialize, Deserialize)]
 pub struct SendMessageOperation{
-	state: ChatMessage
+	state: ChatMessage,
+	
     
 }
+#[derive(Serialize, Deserialize, Debug, DisplayViaDebug, Clone)]
+#[serde(rename_all="camelCase")]
+pub struct SendMessageOperationResult{
+	pub message_status: MessageStatus,
+	pub client_message_id: Uuid
+}
 
-impl Operation<(), ChatMessage> for SendMessageOperation{
+impl Operation<SendMessageOperationResult, ChatMessage> for SendMessageOperation{
 	fn new(state: ChatMessage) -> Self {
 		SendMessageOperation{
 			state
@@ -25,11 +34,14 @@ impl Operation<(), ChatMessage> for SendMessageOperation{
 		self.state.clone()
 	}
 
-	async fn execute(&mut self) -> OpResult<ImResponse<()>> {
+	async fn execute(&mut self) -> OpResult<ImResponse<SendMessageOperationResult>> {
 		send_message_to_user(&MessageProtocol::Chat(self.state()), self.state.target).await?;
 		Ok(ImResponse{
     		status: StatusCode::OK,
-    		body: (),
+    		body: SendMessageOperationResult{
+				client_message_id: self.state.client_request_id,
+				message_status: MessageStatus::Sent
+			},
 })}
 }
 

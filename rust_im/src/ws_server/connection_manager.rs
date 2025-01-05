@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{any::Any, sync::Arc};
 
 use anyhow::{Result};
 use axum::{extract::ws::{CloseFrame, Message, WebSocket}, http::StatusCode};
@@ -8,7 +8,7 @@ use futures_util::{stream::{SplitSink, SplitStream}, SinkExt, StreamExt};
 use tracing::{info, error};
 use uuid::Uuid;
 
-use crate::{models::user::{self, user::User}, operation::operation::{OpError, OpErrorInput, Operation, OperationsExecutor}, ws_server::{messaging_service::send_message_to_user, operations::send_mesage_operation::SendMessageOperation}, CONNECTION_MANAGER};
+use crate::{models::user::{self, user::User}, operation::operation::{OpError, OpErrorInput, Operation, OperationsExecutor}, ws_server::{im_message::SuccessMessage, messaging_service::{send_error_to_user, send_message_to_user}, operations::send_mesage_operation::SendMessageOperation}, CONNECTION_MANAGER};
 
 use super::im_message::MessageProtocol;
 pub struct ConnectionManager{
@@ -61,26 +61,40 @@ async fn read_from_socket(mut receiver: SplitStream<WebSocket>, user_id: Uuid) {
 					match serde_json::from_str(message.as_str()){
 							Ok(msg) => {
 								let op = SendMessageOperation::new(msg);
-								OperationsExecutor::execute_op(op).await.unwrap();
+								match OperationsExecutor::execute_op(op).await {
+											Ok(res) => {
+												let success_message = SuccessMessage{
+                									client_request_id: res.body.client_message_id,
+                									message_status: res.body.message_status
+												}; 
+												// TODO: handle success message failure (should probably be the same handling as afailing to send an error message)
+												send_message_to_user(&MessageProtocol::Success(success_message), user_id).await.unwrap();
+											},
+											Err(err) => {
+												send_error_to_user(err.into_default_state(), user_id).await;
+											},
+										};
 							},
 							Err(err) => {
-								let error_message = MessageProtocol::Error(OpError::bad_request(OpErrorInput{
+								let op_error: OpError = OpError::bad_request(OpErrorInput{
 									message: Some(format!("Failed parsing request message, failed with error {}", err)),
 									status: None,
 									state: None,
-        						}));
-								if let Err(err) = send_message_to_user(&error_message, user_id).await{
-									match err.status{
-										StatusCode::INTERNAL_SERVER_ERROR => {
-											error!("Failed sending server error - {error_message} to user {user_id}")
-										},
-										_ => send_message_to_user(message, target),
-									}
-								};
+        						});
+								send_error_to_user(op_error, user_id).await;
 							},
 						};
 				},
-				_ => todo!()
+				val => {
+					let op_error: OpError = OpError::bad_request(OpErrorInput{
+						message: Some(format!("Invalid web socket message type - expected type 'text'")),
+						status: None,
+						state: None,
+					});
+					send_error_to_user(op_error, user_id).await;
+
+
+				}
 			};
 		} else {
 			handle_disconnect(None, user_id);

@@ -35,7 +35,6 @@ pub enum MessageStatus{
 pub enum MessageProtocol{
 	Chat(ChatMessage),
 	Success(SuccessMessage),
-	Failure,
 	Error(OpError)
 
 }
