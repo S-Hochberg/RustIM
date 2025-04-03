@@ -102,4 +102,3 @@ fn is_make_partial_attr(attr: &Attribute) -> bool {
         .map(|ident| ident == "make_partial")
         .unwrap_or(true)
 }
-

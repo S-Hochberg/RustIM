@@ -21,8 +21,10 @@ tower = "0.4.13"
 async-trait = "0.1.81"
 dotenv = "0.15.0"
 thiserror = "1.0.63"
-chrono = "0.4.38"
+chrono = {version="0.4.38", features=["serde"]}
 tracing-test = "0.2.5"
 rand = "0.8.5"
 dashmap = "6.1.0"
 futures-util = "0.3.31"
+ts-rs = {version="10.1", features =["uuid-impl", "chrono-impl"]}
+serde_json = "1.0.140"

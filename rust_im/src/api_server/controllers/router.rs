@@ -8,8 +8,8 @@ use uuid::Uuid;
 use tracing::{debug, info, span, Level, Span};
 
 
-use super::controllers::{connections_controller::{ConnectionsController}, controller::Controller, users_controller::UsersController};
 struct RequestLatency(Duration);
+use super::controllers::{connections_controller::ConnectionsController, controller::Controller, users_controller::UsersController};
 
 impl fmt::Display for RequestLatency {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
