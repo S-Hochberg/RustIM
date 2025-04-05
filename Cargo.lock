@@ -1244,6 +1244,7 @@ dependencies = [
  "sqlx",
  "thiserror 1.0.63",
  "tokio",
+ "tokio-util",
  "tower",
  "tower-http",
  "tracing",
@@ -1883,6 +1884,21 @@ dependencies = [
  "log",
  "tokio",
  "tungstenite",
+]
+
+[[package]]
+name = "tokio-util"
+version = "0.7.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b9590b93e6fcc1739458317cccd391ad3955e2bde8913edf6f95f9e65a8f034"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "futures-sink",
+ "futures-util",
+ "hashbrown",
+ "pin-project-lite",
+ "tokio",
 ]
 
 [[package]]

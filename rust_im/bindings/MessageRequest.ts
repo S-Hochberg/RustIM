@@ -3,4 +3,4 @@ import type { ChatOperation } from "./ChatOperation";
 import type { ConversationType } from "./ConversationType";
 import type { MessageType } from "./MessageType";
 
-export type MessageRequest = { operation: ChatOperation, recipient: string, conversationType: ConversationType, messageType: MessageType, contents: string, };
+export type MessageRequest = { operation: ChatOperation, recipient: string, conversationType: ConversationType, messageType: MessageType, content: string, };

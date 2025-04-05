@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 #[derive(TS)]
 #[ts(export)]
-#[derive(Deserialize, Serialize, Clone, Debug, DisplayViaDebug)]
+#[derive(Deserialize, Serialize, Clone, Debug, DisplayViaDebug, Copy)]
 pub enum ConversationType{
 	Direct,
 	Group

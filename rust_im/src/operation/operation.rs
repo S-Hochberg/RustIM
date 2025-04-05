@@ -1,6 +1,6 @@
-use std::{ fmt::{Debug, Display}};
+use std::{ convert::Infallible, fmt::{Debug, Display}};
 
-use axum::{http::StatusCode, response::{IntoResponse, Response}};
+use axum::{extract::ws::CloseCode, http::{response::Parts, StatusCode}, response::{IntoResponse, IntoResponseParts, Response, ResponseParts}};
 use anyhow::Result;
 use macros::{DisplayViaDebug};
 use serde::Serialize;
@@ -21,7 +21,7 @@ pub struct ErrorResponse{
 pub struct OpError<State = DefaultState>
 where State: Display + Debug
 {
-	pub status: StatusCode,
+	pub status: OpErrorStatus,
 	pub message: String,
 	pub state: Option<State>
 }
@@ -44,17 +44,44 @@ impl<R: Serialize> IntoResponse for ImResponse<R>{
 		(self.status, axum::Json(self.body)).into_response()
 	}
 }
+#[derive(Error, Debug, DisplayViaDebug)]
+pub enum OpType{
+	HTTP,
+	WS
+}
+#[derive(Error, Debug, DisplayViaDebug, PartialEq, Eq)]
+pub enum OpErrorStatus{
+	HTTP(StatusCode),
+	WS(CloseCode)
+}
+impl IntoResponseParts for OpErrorStatus {
+    type Error = StatusCode;
+
+    fn into_response_parts(self, mut parts: ResponseParts) -> Result<ResponseParts, Self::Error> {
+        match self {
+            OpErrorStatus::HTTP(status) => {
+                Err(status)
+            }
+            OpErrorStatus::WS(_close_code) => {
+                // Should never happen
+                Err(StatusCode::INTERNAL_SERVER_ERROR)
+            }
+        }
+    }
+}
+
 pub struct OpErrorInput<State>{
 	pub message: Option<String>,
-	pub status: Option<StatusCode>,
-	pub state: Option<State>
+	pub status: Option<OpErrorStatus>,
+	pub state: Option<State>,
+	pub op_type: OpType
 }
 impl<State: Debug + Display> OpError<State>{
 	pub fn new(input: OpErrorInput<State>) -> Self{
 		let message = input.message.unwrap_or(String::from("Internal Error"));
 		let status = match input.status{
 			Some(status) => status,
-			None => OpError::<State>::message_to_status(&message),
+			None => OpError::<State>::message_to_status(&message, &input.op_type)
 		};
 		OpError{
 			 status,
@@ -62,30 +89,52 @@ impl<State: Debug + Display> OpError<State>{
 			 state: input.state
 			}
 	}
-	pub fn message_to_status(message: &String) -> StatusCode{
-		match message.to_lowercase(){
-			message if message.contains("not found") => StatusCode::NOT_FOUND,
-			_ => StatusCode::INTERNAL_SERVER_ERROR
+	pub fn message_to_status(message: &String, op_type: &OpType) -> OpErrorStatus{
+		match op_type{
+			OpType::WS => match message.to_lowercase(){
+				message if message.contains("not found") => OpErrorStatus::WS(1002),
+				_ => OpErrorStatus::WS(1011)
+			},
+			OpType::HTTP => match message.to_lowercase(){
+				message if message.contains("not found") => OpErrorStatus::HTTP(StatusCode::NOT_FOUND),
+				_ => OpErrorStatus::HTTP(StatusCode::INTERNAL_SERVER_ERROR)
+			},
 		}
 	}
 	// pub fn concat_message(&mut self, message: String) -> &Self{
 	// 	self.message = format!("{} - {}", self.message, message);
 	// 	self
 	// }
-	pub fn internal_error() -> Self{
-		OpError{
-			message: "Internal Error".to_string(),
-			state: None,
-			status: StatusCode::INTERNAL_SERVER_ERROR
+	pub fn internal_error(op_type: &OpType) -> Self{
+		match op_type{
+			OpType::HTTP => OpError{
+				message: "Internal Error".to_string(),
+				state: None,
+				status: OpErrorStatus::HTTP(StatusCode::INTERNAL_SERVER_ERROR)
+			},
+			OpType::WS => OpError{
+				message: "Internal Error".to_string(),
+				state: None,
+				status: OpErrorStatus::WS(1011)
+			},
 		}
 	}
 	pub fn bad_request(input: OpErrorInput<State>) -> OpError<State>{
 		let message = input.message.unwrap_or(String::from("Bad Request"));
-		OpError::new(OpErrorInput{
-			message: Some(message),
-			status: Some(StatusCode::BAD_REQUEST),
-			state: input.state
-		})
+		match input.op_type {
+			OpType::HTTP => OpError::new(OpErrorInput{
+				message: Some(message),
+				status: Some(OpErrorStatus::HTTP(StatusCode::BAD_REQUEST)),
+				state: input.state,
+				op_type: input.op_type
+			}),
+			OpType::WS => OpError::new(OpErrorInput{
+				message: Some(message),
+				status: Some(OpErrorStatus::WS(1002)),
+				state: input.state,
+				op_type: input.op_type
+			}),
+		}
 	}
 }
 pub trait Operation<Res: Serialize, State = DefaultState>

@@ -32,7 +32,8 @@ impl Operation<CreateUserOpResponse, UserInput> for CreateUserOperation{
 
 #[cfg(test)]
 mod tests{
-	use crate::test_setups::test_utils::test_utils::sample_user_input;
+	use crate::operation::operation::OpErrorStatus;
+use crate::test_setups::test_utils::test_utils::sample_user_input;
     use crate::{operations::users::create_user_operation::CreateUserOperation,operation::{operation::{Operation, OperationsExecutor}}, test_setups::{test_setup}};
 	use axum::http::StatusCode;
 	
@@ -75,7 +76,7 @@ mod tests{
 		let res = OperationsExecutor::execute_op(second_op).await;
 		assert!(res.is_err());
 		if let Err(err) = res {
-			assert_eq!(err.status, StatusCode::BAD_REQUEST);
+			assert_eq!(err.status, OpErrorStatus::HTTP(StatusCode::BAD_REQUEST));
 			assert!(err.message.contains("Duplicate user"));
 			let state = err.state.unwrap();
 			assert_eq!(state.email, user_input.email);

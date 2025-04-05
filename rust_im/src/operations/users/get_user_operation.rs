@@ -1,6 +1,5 @@
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
-
 use crate::{ models::user::user::{PartialUser, User}, operation::operation::{OpResult, Operation, ImResponse}, repo::{users_repo::users_repo::UsersRepo, DBDrivers}};
 #[derive(Serialize, Deserialize)]
 pub struct GetUserOperation{
@@ -27,7 +26,7 @@ impl Operation<User, PartialUser> for GetUserOperation{
 
 #[cfg(test)]
 mod tests{
-    use crate::{operations::users::get_user_operation::GetUserOperation, models::user::user::{PartialUser}, operation::{operation::{Operation, OperationsExecutor}}, test_setups::{test_setup, test_utils::test_utils::{create_test_user}}};
+    use crate::{models::user::user::PartialUser, operation::operation::{OpErrorStatus, Operation, OperationsExecutor}, operations::users::get_user_operation::GetUserOperation, test_setups::{test_setup, test_utils::test_utils::create_test_user}};
 	use axum::http::StatusCode;
 	use tracing_test::traced_test;
 	use uuid::Uuid;
@@ -51,7 +50,7 @@ mod tests{
 		let res = OperationsExecutor::execute_op(op).await;
 		assert!(res.is_err());
 		if let Err(err) = res {
-			assert_eq!(err.status, StatusCode::NOT_FOUND);
+			assert_eq!(err.status, OpErrorStatus::HTTP(StatusCode::NOT_FOUND));
 			assert!(err.message.contains("User not found"));
 		}
 	}

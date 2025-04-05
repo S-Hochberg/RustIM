@@ -4,7 +4,7 @@ use axum::{async_trait, http::StatusCode};
 
 
 use tracing::{error};
-use crate::{io::io::IO, models::user::user::{PartialUser, User}, operation::operation::{OpError, OpErrorInput, OpResult}, CONFIG};
+use crate::{io::io::IO, models::user::user::{PartialUser, User}, operation::operation::{OpError, OpErrorInput, OpErrorStatus, OpResult, OpType}, CONFIG};
 
 use super::UsersDb;
 
@@ -19,10 +19,10 @@ impl UsersDb for PostgresUsersDB{
 			Err(db_error) => {
 				match db_error {
 					sqlx::Error::Database(e) if e.message().contains("duplicate key") =>
-						Err(OpError::bad_request(OpErrorInput{message: Some("Duplicate user".to_string()), status: Some(StatusCode::BAD_REQUEST), state: None })),
+						Err(OpError::bad_request(OpErrorInput{message: Some("Duplicate user".to_string()), status: Some(OpErrorStatus::HTTP(StatusCode::BAD_REQUEST)), state: None, op_type: OpType::HTTP })),
 					_ => {
 						error!("{:?}", db_error);
-						Err(OpError::internal_error())
+						Err(OpError::internal_error(&OpType::HTTP))
 					}
 				}?
 			},
@@ -39,7 +39,7 @@ impl UsersDb for PostgresUsersDB{
 				PartialUser{user_name: Some(user_name), email: _, id: _} => Ok(format!("email = '{}'", user_name)),
 				PartialUser{id: None, email: None, user_name: None} => Err(OpError{
 					message: "Must pass in user id, email, or user_name to get it".to_string(), 
-					status: StatusCode::BAD_REQUEST,
+					status: OpErrorStatus::HTTP(StatusCode::BAD_REQUEST),
 					state: None
 				})
 			}?;
@@ -52,10 +52,10 @@ impl UsersDb for PostgresUsersDB{
 			Err(db_error) => {
 				match db_error {
 					sqlx::Error::RowNotFound =>
-						Err(OpError{message: "User not found".to_string(), status: StatusCode::NOT_FOUND, state: None }),
+						Err(OpError{message: "User not found".to_string(), status: OpErrorStatus::HTTP(StatusCode::NOT_FOUND), state: None }),
 					_ => {
 						error!("{:?}", db_error);
-						Err(OpError::internal_error())
+						Err(OpError::internal_error(&OpType::HTTP))
 					}
 				}?
 			},

@@ -1,4 +1,5 @@
 use std::{error::Error, net::SocketAddr};
+use axum::{extract::ws::CloseFrame, http::header::CONNECTION};
 use bootstrap::bootstrap::Bootstrap;
 use config::config::Config;
 use io::io::{Io};
@@ -80,4 +81,5 @@ async fn shutdown_signal() {
         _ = terminate => {println!("Recieved termination signal - terminating")},
         _ = ctrl_c => {println!("Recieved CTRL + C - terminating")}
     }
+    CONNECTION_MANAGER.handle_shutdown().await;
 }

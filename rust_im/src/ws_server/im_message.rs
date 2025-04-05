@@ -8,15 +8,16 @@ use super::conversation::ConversationType;
 
 #[derive(TS)]
 #[ts(export)]
-#[derive(Deserialize, Serialize, Clone, Debug, DisplayViaDebug)]
+#[derive(Deserialize, Serialize, Clone, Debug, DisplayViaDebug, Copy)]
 pub enum MessageType{
 	Text
 }
 #[derive(TS)]
 #[ts(export)]
-#[derive(Deserialize, Serialize, Clone, Debug, DisplayViaDebug)]
+#[derive(Deserialize, Serialize, Clone, Debug, DisplayViaDebug, Copy)]
 pub enum ChatOperation{
 	Message,
+	MessageReceived
 	// Typing,
 	// StoppedTyping,
 	// Delete,
@@ -32,7 +33,7 @@ pub struct MessageRequest{
 	pub recipient: Uuid,
 	pub conversation_type: ConversationType,
 	pub message_type: MessageType,
-	pub contents: String
+	pub content: String
 }
 #[derive(TS)]
 #[ts(export)]
@@ -42,9 +43,9 @@ pub struct ImMessage{
 	pub message_type: MessageType,
 	pub content: String,
 	pub sender: Uuid,
-	pub conversation: Uuid,
 	pub conversation_type: ConversationType,
+	pub recipient: Uuid,
 	pub sent_at: DateTime<Utc>,
-	pub recieved_at: DateTime<Utc>,
+	pub recieved_at: Option<DateTime<Utc>>,
 	pub updated_at: DateTime<Utc>
 }

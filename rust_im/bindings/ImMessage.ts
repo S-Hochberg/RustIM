@@ -2,4 +2,4 @@
 import type { ConversationType } from "./ConversationType";
 import type { MessageType } from "./MessageType";
 
-export type ImMessage = { messageType: MessageType, content: string, sender: string, conversation: string, conversationType: ConversationType, sentAt: string, recievedAt: string, updatedAt: string, };
+export type ImMessage = { messageType: MessageType, content: string, sender: string, conversationType: ConversationType, recipient: string, sentAt: string, recievedAt: string | null, updatedAt: string, };

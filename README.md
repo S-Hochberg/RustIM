@@ -9,13 +9,14 @@ Rust based instant messaging service.
 - [X] Implement create user endpoint with tests
 - [X] add a test framework
 - [X] Implement get user endpoint
-- [ ] Implement http based handshake to create a web socket connection to the client
-- [ ] Implement basic messaging (text, user to user)
+- [X] Implement http based handshake to create a web socket connection to the client
+- [X] Implement basic messaging (text, user to user)
+- [ ] Implement react UI
 - [ ] Implement update user endpoint
 - [ ] Implement user status (online, offline, away) and last seen
 - [ ] Implement chat backlog (user can send X messages and they will get synced to the recipient when they connect)
-- [ ] Implement react UI
 - [ ] Fix all warnings
+- [ ] Implement tracing for web socket controller
 - [ ] Implement delete user endpoint
 - [ ] Implement prettier error json messages
 - [ ] Fix env vars to load at runtime
