@@ -15,6 +15,7 @@ use crate::{models::user::user::User, operation::operation::{OpError, OpErrorInp
 
 use super::conversation::ConversationType;
 
+use super::im_message::MessageProtocol;
 pub struct ConnectionManager{
 	pub connection_map: Arc<DashMap<Uuid, ClientConnection>>,
 	task_tracker: TaskTracker,
@@ -76,7 +77,7 @@ impl ConnectionManager{
 		}
 	}
 }
-
+ 
 pub struct ClientConnection{
 	pub send_channel: SplitSink<WebSocket, Message>,
 	pub connection_time: DateTime<Utc>,
